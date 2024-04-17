@@ -7,3 +7,5 @@ source "https://rubygems.org"
 gem "rspec", "~> 3.13"
 
 gem "activesupport", "~> 7.1"
+
+gem "byebug"
