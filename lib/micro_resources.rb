@@ -46,6 +46,7 @@ module MicroResources
       group = OpenStruct.new(
         id: base_path.scan(GROUP_ID_PATTERN).first.delete_suffix('_'),
         name: base_path.gsub(GROUP_ID_PATTERN, '').to_sym,
+        metadata_path: Rails.root.join(group_path, GROUP_METADATA_DIRECTORY),
         relative_path: relative_path,
         base_dir: File.basename(relative_path, File::SEPARATOR),
         routes_file: routes_file,
