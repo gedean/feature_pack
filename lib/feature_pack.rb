@@ -35,9 +35,6 @@ module FeaturePack
     @@javascript_files_paths = Dir.glob("#{@@features_path}/[!_]*/**/*.js")
       .map { |js_path| js_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '') }.to_a
 
-    # @@layouts_paths = Dir.glob("#{@@features_path}/[!_]*/**/views/layouts")
-      # .map { |layout_path| layout_path.delete_suffix '/layouts' }
-
     ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
     
     @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
@@ -80,7 +77,8 @@ module FeaturePack
         
         feature_name = base_path.gsub(FEATURE_ID_PATTERN, '').to_sym
         feature_class_name = "#{group.name.name.camelize}::#{feature_name.name.camelize}"
-        # FIX-ME
+        
+        # FIX-ME (decouple Params class)
         # params_class_name = "#{feature_pack_class_name}::Params"
         
         routes_file_path = relative_path.join('routes.rb')
@@ -110,12 +108,12 @@ module FeaturePack
           views_absolute_path: absolute_path.join('views'),
           views_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('views'),
           class_name: feature_class_name,
-          # FIX-ME
+          # FIX-ME (decouple Params class)
           #params_class_name: params_class_name,
           manifest: YAML.load_file(File.join(feature_path, MANIFEST_FILE_NAME)).deep_symbolize_keys
         )
 
-        # FIX-ME
+        # FIX-ME (decouple Params class)
         # def feature.params_class = params_class_name.constantize
         def feature.view(view_name) = "#{views_relative_path}/#{view_name}"
 
