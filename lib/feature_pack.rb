@@ -13,14 +13,17 @@ module FeaturePack
     group_controllers_paths controllers_paths].freeze
 
   def self.setup
-    raise 'FeaturePack already setup!' if defined?(@@relative_root_path)
+    raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
     
     @@core_path = Pathname.new(__dir__)
 
     @@group_controllers_paths = []
     @@controllers_paths = []
     @@relative_root_path = Pathname.new(RELATIVE_ROOT_PATH)
-    @@absolute_root_path = Rails.root.join(RELATIVE_ROOT_PATH)
+    
+    # Don't fail tests outside of a Rails app
+    @@absolute_root_path = defined?(Rails) ? Rails.root.join(RELATIVE_ROOT_PATH) : nil
+
     @@ignored_paths = Dir.glob("#{RELATIVE_ROOT_PATH}/[!]*/")
     @@javascript_files_paths = Dir.glob("#{@@relative_root_path}/[!_]*/**/*.js")
       .map { |js_path| js_path.sub(/^#{Regexp.escape(@@relative_root_path.to_s)}\//, '') }.to_a
@@ -108,6 +111,8 @@ module FeaturePack
         group.features << feature
       end
     end
+
+    @@setup_executed_flag = true
   end
 
   def self.group(group_name) = @@groups.find { |g| g.name.eql?(group_name) }
