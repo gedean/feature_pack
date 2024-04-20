@@ -3,28 +3,28 @@ require 'active_support/all'
 module FeaturePack
   GROUP_ID_PATTERN = /^group_.*?_/.freeze
   FEATURE_ID_PATTERN = /^feature_.*?_/.freeze
-  RELATIVE_ROOT_PATH = 'app/feature_packs'.freeze
   GROUP_METADATA_DIRECTORY = '_group_metadata'.freeze
   MANIFEST_FILE_NAME = 'manifest.yml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
 
-  ATTR_READERS = %i[core_path absolute_root_path relative_root_path
+  ATTR_READERS = %i[feature_pack_lib_path features_path relative_root_path
     groups ignored_paths custom_layouts_paths javascript_files_paths
-    group_controllers_paths controllers_paths].freeze
+    groups_controllers_paths controllers_paths].freeze
 
-  def self.setup
+  def self.setup(features_path = nil)
     raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
-    
-    @@core_path = Pathname.new(__dir__)
 
-    @@group_controllers_paths = []
+    @@features_path = features_path
+    raise "Invalid features_path: '#{@@features_path}'" if @@features_path.nil?
+    raise "Inexistent features_path: '#{@@features_path}'" unless Dir.exist?(@@features_path)
+    
+    @@feature_pack_lib_path = Pathname.new(__dir__)
+
+    @@groups_controllers_paths = []
     @@controllers_paths = []
-    @@relative_root_path = Pathname.new(RELATIVE_ROOT_PATH)
-    
-    # Don't fail tests outside of a Rails app
-    @@absolute_root_path = defined?(Rails) ? Rails.root.join(RELATIVE_ROOT_PATH) : nil
+    @@relative_root_path = Pathname.new(@@features_path)
 
-    @@ignored_paths = Dir.glob("#{RELATIVE_ROOT_PATH}/[!]*/")
+    @@ignored_paths = Dir.glob("#{@@relative_root_path}/[!]*/")
     @@javascript_files_paths = Dir.glob("#{@@relative_root_path}/[!_]*/**/*.js")
       .map { |js_path| js_path.sub(/^#{Regexp.escape(@@relative_root_path.to_s)}\//, '') }.to_a
 
@@ -33,17 +33,19 @@ module FeaturePack
 
     ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
     
-    # load @@core_path.join('feature_pack/error.rb')
-    @@ignored_paths << @@core_path.join('feature_pack/feature_pack_routes.rb')
+    # load @@feature_pack_lib_path.join('feature_pack/error.rb')
+    @@ignored_paths << @@feature_pack_lib_path.join('feature_pack/feature_pack_routes.rb')
 
-    @@groups = Dir.glob("#{RELATIVE_ROOT_PATH}/[!_]*/").map do |group_path|
+    # raise "No Groups Found in: '#{RELATIVE_ROOT_PATH}'" if Dir.glob("#{@@features_path + relative_root_path}/[!_]*/").empty?
+
+    @@groups = Dir.glob("#{@@relative_root_path}/[!_]*/").map do |group_path|
       relative_path = Pathname.new(group_path)
       base_path = File.basename(group_path, File::SEPARATOR)
 
       # On route draw call, the extension is ignored
       routes_file = File.exist?(File.join(group_path, GROUP_METADATA_DIRECTORY, 'routes.rb')) ? File.join(base_path, GROUP_METADATA_DIRECTORY, 'routes') : nil
 
-      @@group_controllers_paths << File.join(group_path, GROUP_METADATA_DIRECTORY, CONTROLLER_FILE_NAME)
+      @@groups_controllers_paths << File.join(group_path, GROUP_METADATA_DIRECTORY, CONTROLLER_FILE_NAME)
       
       raise "Group '#{base_path}' does not have a valid ID" if base_path.scan(GROUP_ID_PATTERN).empty?
       group = OpenStruct.new(
