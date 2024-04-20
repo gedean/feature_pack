@@ -23,7 +23,7 @@ class FeaturePack::Controller < ApplicationController
 
     - Feature dir/_partials, if not exists
       - Fallback to Group, if not exists
-        - Fallback to Application default header
+        - Fallback to Application's default header/footer
 =end
 
     feature_partials_path = @feature.views_relative_path.join('partials')
