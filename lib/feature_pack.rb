@@ -7,38 +7,44 @@ module FeaturePack
   MANIFEST_FILE_NAME = 'manifest.yml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
 
-  ATTR_READERS = %i[feature_pack_lib_path features_path relative_root_path
-    groups ignored_paths custom_layouts_paths javascript_files_paths
-    groups_controllers_paths controllers_paths].freeze
+  ATTR_READERS = %i[
+    path
+    features_path
+    ignored_paths
+    groups
+    groups_controllers_paths
+    features_controllers_paths
+    javascript_files_paths
+  ].freeze
 
-  def self.setup(features_path = nil)
+  def self.setup(features_path:)   
     raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
 
-    @@features_path = features_path
+    @@path = Pathname.new(__dir__)
+    load @@path.join('feature_pack/error.rb')
+
+    @@features_path = Pathname.new(features_path)
     raise "Invalid features_path: '#{@@features_path}'" if @@features_path.nil?
     raise "Inexistent features_path: '#{@@features_path}'" unless Dir.exist?(@@features_path)
-    
-    @@feature_pack_lib_path = Pathname.new(__dir__)
 
     @@groups_controllers_paths = []
-    @@controllers_paths = []
-    @@relative_root_path = Pathname.new(@@features_path)
+    @@features_controllers_paths = []
 
-    @@ignored_paths = Dir.glob("#{@@relative_root_path}/[!]*/")
-    @@javascript_files_paths = Dir.glob("#{@@relative_root_path}/[!_]*/**/*.js")
-      .map { |js_path| js_path.sub(/^#{Regexp.escape(@@relative_root_path.to_s)}\//, '') }.to_a
+    @@ignored_paths = Dir.glob("#{@@features_path}/[!]*/")
 
-    @@custom_layouts_paths = Dir.glob("#{@@relative_root_path}/[!_]*/**/views/layouts")
-      .map { |layout_path| layout_path.delete_suffix '/layouts' }
+    @@javascript_files_paths = Dir.glob("#{@@features_path}/[!_]*/**/*.js")
+      .map { |js_path| js_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '') }.to_a
+
+    # @@layouts_paths = Dir.glob("#{@@features_path}/[!_]*/**/views/layouts")
+      # .map { |layout_path| layout_path.delete_suffix '/layouts' }
 
     ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
     
-    # load @@feature_pack_lib_path.join('feature_pack/error.rb')
-    @@ignored_paths << @@feature_pack_lib_path.join('feature_pack/feature_pack_routes.rb')
+    @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
 
-    # raise "No Groups Found in: '#{RELATIVE_ROOT_PATH}'" if Dir.glob("#{@@features_path + relative_root_path}/[!_]*/").empty?
+    raise "No Groups found in: '#{@@features_path}'" if Dir.glob("#{@@features_path}/[!_]*/").empty?
 
-    @@groups = Dir.glob("#{@@relative_root_path}/[!_]*/").map do |group_path|
+    @@groups = Dir.glob("#{@@features_path}/[!_]*/").map do |group_path|
       relative_path = Pathname.new(group_path)
       base_path = File.basename(group_path, File::SEPARATOR)
 
@@ -51,7 +57,7 @@ module FeaturePack
       group = OpenStruct.new(
         id: base_path.scan(GROUP_ID_PATTERN).first.delete_suffix('_'),
         name: base_path.gsub(GROUP_ID_PATTERN, '').to_sym,
-        metadata_path: Rails.root.join(group_path, GROUP_METADATA_DIRECTORY),
+        metadata_path: @@features_path.join(group_path, GROUP_METADATA_DIRECTORY),
         relative_path: relative_path,
         base_dir: File.basename(relative_path, File::SEPARATOR),
         routes_file: routes_file,
@@ -68,7 +74,7 @@ module FeaturePack
 
     @@groups.each do |group|
       Dir.glob("#{group.relative_path}[!_]*/").each do |feature_path|
-        absolute_path = Rails.root.join(feature_path)
+        absolute_path = @@features_path.join(feature_path)
         relative_path = Pathname.new(feature_path)
         base_path = File.basename(feature_path, File::SEPARATOR)
         
@@ -79,15 +85,18 @@ module FeaturePack
         
         routes_file_path = relative_path.join('routes.rb')
 
-        # The custom routes file loads before the Rails default routes, leading to errors like NoMethodError for 'scope'. Ignoring them is required to prevent these issues.
+        # The custom routes file loads before the Rails default routes,
+        # leading to errors like NoMethodError for 'scope'.
+        # Ignoring them is required to prevent these issues.
         @@ignored_paths << routes_file_path
         
         # Due to Zeiwerk rules, Controllers have special load process
-        @@controllers_paths << relative_path.join(CONTROLLER_FILE_NAME)
+        @@features_controllers_paths << relative_path.join(CONTROLLER_FILE_NAME)
+
         @@ignored_paths << relative_path.join(CONTROLLER_FILE_NAME)
 
         raise "Resource '#{relative_path}' does not have a valid ID" if base_path.scan(FEATURE_ID_PATTERN).empty?
-        feature_sub_path = relative_path.sub(/^#{Regexp.escape(@@relative_root_path.to_s)}\//, '')
+        feature_sub_path = relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '')
         feature = OpenStruct.new(
           id: base_path.scan(FEATURE_ID_PATTERN).first.delete_suffix('_'),
           name: feature_name,
@@ -99,7 +108,7 @@ module FeaturePack
           routes_file: feature_sub_path.join('routes'),
           # controller_path: relative_path.join('controller'),
           views_absolute_path: absolute_path.join('views'),
-          views_relative_path: relative_path.sub(/^#{Regexp.escape(@@relative_root_path.to_s)}\//, '').join('views'),
+          views_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('views'),
           class_name: feature_class_name,
           # FIX-ME
           #params_class_name: params_class_name,
@@ -118,5 +127,9 @@ module FeaturePack
   end
 
   def self.group(group_name) = @@groups.find { |g| g.name.eql?(group_name) }
-  def self.feature(group_name, feature_name) = group(group_name).feature(feature_name)
+  def self.feature(group_name, feature_name)
+    requested_group = group(group_name)
+    return nil if requested_group.nil?
+    requested_group.feature(feature_name)
+  end
 end

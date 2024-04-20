@@ -1,19 +1,21 @@
 require 'rspec'
+require 'ostruct'
 require_relative '../lib/feature_pack'
 
+FIXTURES_FEATURES_PATH = 'spec/fixtures/feature_packs'
 RSpec.describe FeaturePack do
   before(:all) do
-    FeaturePack.setup('./fixtures/feature_packs')
+    FeaturePack.setup(features_path: FIXTURES_FEATURES_PATH)
   end
 
   describe '.setup' do
     it 'should raise an error if FeaturePack is already setup' do
-      expect { FeaturePack.setup }.to raise_error('FeaturePack already setup!')
+      expect { FeaturePack.setup(features_path: FIXTURES_FEATURES_PATH) }.to raise_error('FeaturePack already setup!')
     end
 
     
     it 'should set up the core_path' do
-      expect(FeaturePack.core_path).to be_a(Pathname)
+      expect(FeaturePack.path).to be_a(Pathname)
     end
 
     it 'should set up the groups' do
@@ -24,9 +26,9 @@ RSpec.describe FeaturePack do
 
   describe '.group' do
     it 'should return the group with the given name' do
-      group = FeaturePack.group(:my_group)
+      group = FeaturePack.group(:foo)
       expect(group).to be_an(OpenStruct)
-      expect(group.name).to eq(:my_group)
+      expect(group.name).to eq(:foo)
     end
 
     it 'should return nil if the group does not exist' do
@@ -37,10 +39,10 @@ RSpec.describe FeaturePack do
 
   describe '.feature' do
     it 'should return the feature with the given group and feature name' do
-      feature = FeaturePack.feature(:my_group, :my_feature)
+      feature = FeaturePack.feature(:foo, :bar)
       expect(feature).to be_an(OpenStruct)
-      expect(feature.group.name).to eq(:my_group)
-      expect(feature.name).to eq(:my_feature)
+      expect(feature.group.name).to eq(:foo)
+      expect(feature.name).to eq(:bar)
     end
 
     it 'should return nil if the feature or group does not exist' do
