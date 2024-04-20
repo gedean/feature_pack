@@ -66,3 +66,25 @@ end
   def feature_pack_group_path(group, *params) = send("feature_pack_#{group.name}_path".to_sym, *params)
   def feature_pack_path(group, feature, *params) = send("feature_pack_#{group.name}_#{feature.name}_path".to_sym, *params)
 ```
+
+```ruby
+# config/initializers/assets.rb
+
+Rails.application.config.assets.precompile += FeaturePack.javascript_files_paths
+```
+
+```ruby
+# config/importmap.rb
+
+FeaturePack.javascript_files_paths.each do |js_file_path|
+  extensionless_js_file_path = js_file_path.delete_suffix('.js')
+  pin extensionless_js_file_path, to: extensionless_js_file_path, preload: false
+end
+```
+
+```ruby
+# config/routes.rb
+namespace :feature_pack, path: nil do
+  draw :feature_pack_routes
+end
+```
