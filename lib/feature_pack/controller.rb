@@ -8,7 +8,7 @@ class FeaturePack::Controller < ApplicationController
   private
 
   def set_feature
-    @feature = FeaturePack.feature *params['controller'].delete_prefix('feature/').split('/').map(&:to_sym)
+    @feature = FeaturePack.feature *params['controller'].delete_prefix('feature_pack/').split('/').map(&:to_sym)
   end
 
   def set_view_lookup_context_prefix
@@ -18,9 +18,13 @@ class FeaturePack::Controller < ApplicationController
   end
 
   def set_layout_paths
-    # FeaturePack Header
-    # Fallback to Group
-    # Fallback to Application default header
+=begin
+    Header/Footer Lookup order
+
+    - Feature dir/_partials, if not exists
+      - Fallback to Group, if not exists
+        - Fallback to Application default header
+=end
 
     feature_partials_path = @feature.views_relative_path.join('partials')
     group_partials_path = @feature.group.views_path.concat('/partials')
