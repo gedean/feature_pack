@@ -1,0 +1,11 @@
+p O Município de #{'Prainha - PA'} teve um crescimento populacional de #{@processing.result['raw']} habitates entre os anos de #{@processing.params['real']['start_year']} e #{@processing.params['real']['end_year']}. Tendo as seguintes projeções anuais: 
+- @processing.historical_series.as_struct.each do |a|
+  br
+  | Em #{a.year} a população foi de #{number_with_delimiter a.population, delimiter: '.'} habitantes;
+
+br
+p Em relação à Regional de Saúde, a projeção atual da população dos municípios é de: 
+- @processing.ranking.deep_symbolize_keys[:pops][:data].each do |city|
+  br
+  | #{city[:city_name]}, com #{number_with_delimiter city[:city_population], delimiter: '.'} habitantes;
+

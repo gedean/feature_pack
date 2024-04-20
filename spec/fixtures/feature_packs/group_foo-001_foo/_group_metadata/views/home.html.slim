@@ -1,0 +1,46 @@
+= link_to 'Página Oficial Previne Brasil', 'https://www.gov.br/saude/pt-br/composicao/saps/previne-brasil', target: '_blank'
+/ - @group.micro_engines.select {|dv| dv.manifest[:class].eql?(:previne_brasil_financing_axis)}.each do |micro_engine|
+/   .d-flex.gap-3
+/     .row.border-start.border-3.mx-0 class="border-#{micro_engine.manifest[:base_color]}"
+/       .col-auto
+/         img src = micro_engine.manifest[:img] alt = micro_engine.manifest[:img_alt] class="img-fluid" width="120px" height="44px"
+/       .col
+/         h3#xxx 
+/           = link_to "#{micro_engine.manifest[:name]}", micro_engine_path(micro_engine, params[:entity_type], params[:entity_id])
+/           .text-muted 
+/             h6
+/               strong = micro_engine.manifest[:description]
+
+
+/ = link_to 'E-SUS', micro_engine_path(@group.micro_engine(:esus), params[:entity_type], params[:entity_id])
+
+= link_to 'Acessar', feature_pack_group_path(@group, :municipio, 150095), class: 'btn btn-sm btn-primary'
+
+h1 Previne Brasil
+nav
+  ul
+    li 
+      a href="#" Início
+    li 
+      a href="#" Sobre o Programa
+    li 
+      a href="#" Como Participar
+    li
+      a href="#" Contato
+
+main
+section id="introduction"
+  h2 Introdução
+  p Descrição geral sobre o Previne Brasil e seu objetivo.
+  
+section id="objective"
+  h2 Objetivo
+  p Detalhes sobre os objetivos do Previne Brasil.
+  
+section id="how-it-works"
+  h2 Como Funciona
+  p Informações sobre como o programa é implementado e como os municípios podem participar.
+
+section id="benefits"
+  h2 Benefícios
+  p Descrição dos benefícios para os municípios participantes.

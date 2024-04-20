@@ -1,0 +1,41 @@
+class FeaturePack::PrevineBrasil::CaptacaoPonderada::Queries::Prenatala < Querier
+#  @active_record_class = FeaturePack::RootGroup::Base::EsusRecord
+
+  QUERY = <<-SQL
+SELECT
+tb_unidade_saude.no_unidade_saude,
+tb_equipe.no_equipe,
+tb_prof.no_profissional,
+tb_cds_prof.nu_cbo_2002,
+tb_cbo.no_cbo,
+tb_cds_ficha_atend_individual.dt_ficha::DATE,
+tb_cds_ficha_atend_individual.dt_ficha::DATE = CURRENT_DATE AS is_today,
+Age(tb_cds_ficha_atend_individual.dt_ficha::DATE) AS dt_atend_age,
+Extract(YEAR FROM Age(tb_cds_ficha_atend_individual.dt_ficha::DATE)) AS dt_atend_age_year,
+Extract(MONTH FROM Age(tb_cds_ficha_atend_individual.dt_ficha::DATE)) AS dt_atend_age_month,
+Extract(DAY FROM Age(tb_cds_ficha_atend_individual.dt_ficha::DATE)) AS dt_atend_age_day,
+tb_cds_prof.nu_cnes::Bigint AS rls_cnes,
+tb_cds_prof.nu_ine::Bigint AS rls_ine,
+tb_cds_prof.nu_cns::Bigint AS rls_cns
+FROM
+tb_cds_ficha_atend_individual LEFT JOIN
+tb_cds_prof ON tb_cds_ficha_atend_individual.co_cds_prof = tb_cds_prof.co_seq_cds_prof LEFT JOIN
+tb_prof ON tb_prof.nu_cns = tb_cds_prof.nu_cns LEFT JOIN
+tb_cbo ON tb_cbo.co_cbo_2002 = tb_cds_prof.nu_cbo_2002 INNER JOIN
+tb_equipe ON tb_equipe.nu_ine = tb_cds_prof.nu_ine LEFT JOIN
+tb_unidade_saude ON tb_unidade_saude.nu_cnes = tb_cds_prof.nu_cnes
+WHERE
+tb_cds_ficha_atend_individual.st_ficha = -1;
+SQL
+
+  def initialize
+    @query_template = QUERY
+    super
+  end
+
+  def data_cache
+    DataStore.create entity_id: 150190,
+      metadata: { name: 'Prenatal', description: 'Prenatal' },
+      data: select_all.as_json
+  end
+end

@@ -1,0 +1,29 @@
+- content_for(:head) do
+  = javascript_import_module_tag '001_geral/001_crescimento_populacional/views/javascripts/history_chart'
+  = javascript_import_module_tag '001_geral/001_crescimento_populacional/views/javascripts/population_distribution_chart'
+  = javascript_import_module_tag '001_geral/001_crescimento_populacional/views/javascripts/percent_chart'
+
+h1 Crescimento Populacional
+
+h2 Histórico de Crescimento Populacional
+#history-chart-container
+strong Fonte: 
+| Instituto Brasileiro de Geografia e Estatística - IBGE
+br
+= credits_akapu_intelligence()
+
+.d-flex.align-items-center.justify-content-center
+  = render partial: @processor.view('partials/history_table')
+.d-flex.align-items-center.justify-content-center
+  = credits_akapu_intelligence()
+
+= render partial: @processor.view('partials/html1')
+
+h2 Comparativo em relação à Região de Saúde
+#population-distribution-chart style="width:100%; height:550px;"
+#percent-chart-container
+
+
+legend Implementações Futuras
+ul
+  li Comparação de Crescimento Populacional de Todos os Municípios da Região

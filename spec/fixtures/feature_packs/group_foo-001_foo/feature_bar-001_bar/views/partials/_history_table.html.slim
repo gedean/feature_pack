@@ -1,0 +1,16 @@
+table.table.table-stripped.table-bordered.table-condensed.akapu-table-header style="width: 450px;"
+  tr
+    th rowspan="2" Ano
+    th rowspan="2" População
+    th colspan="2" Diferença em relação ao ano anterior
+  tr
+    th Absoluta
+    th Percentual
+  - @processing.historical_series.as_struct.each do |serie_item|
+    tr.akapu-text-right
+      td.akapu-text-center= serie_item.year
+      td = number_with_delimiter serie_item.population, delimiter: '.'
+      td = number_with_delimiter serie_item.absolute_difference
+      - percentage_number = "%0.2f" % serie_item.percentage_difference unless serie_item.percentage_difference.nil?
+      - percentage_number = "#{number_with_delimiter percentage_number, separator: ','}%"
+      td = (percentage_number) unless serie_item.percentage_difference.nil?

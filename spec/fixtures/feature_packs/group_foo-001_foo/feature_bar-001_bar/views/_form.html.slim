@@ -1,0 +1,15 @@
+/ - @processor_params.start_year = 2008
+/ - if processor_params
+/- @processor_params.end_year = Date.today.year
+/- @processor_params.valid?
+
+= simple_form_for @processor_params,
+									as: :processor_params,
+									url: processing_post_url(params['entity_id'], @indicator) do |f|
+	.row
+		.col-md-auto
+			= f.input :start_year, label: 'Ano Inicial', input_html: {class: 'scope-field', placeholder: 'ex.: 2008'}, autofocus: true
+		.col-md-auto
+			= f.input :end_year, label: 'Ano Final', input_html: {class: 'scope-field', placeholder: 'ex.: 2017'}
+	br
+	= f.button :submit, value: 'Consultar', class: 'btn-primary'

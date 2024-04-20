@@ -1,0 +1,7 @@
+class Geral::CrescimentoPopulacional::Params < RootGroup::Base::Params
+  @real_fields = %i(entity_id start_year end_year)
+
+  validates_presence_of :entity_id, :start_year, :end_year
+
+  def showcase = { "Ano Inicial/Ano Final" => "#{values[:real][:start_year]} - #{values[:real][:end_year]}" }
+end

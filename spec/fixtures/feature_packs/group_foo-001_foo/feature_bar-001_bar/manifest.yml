@@ -1,0 +1,12 @@
+name: Capitação Ponderada
+description: 
+type: :alert
+class: :previne_brasil_financing_axis
+url: capitacao-ponderada
+version: 1.0.0
+capabilities:
+  - :whatsapp_text_alert
+  - :whatsapp_protected_pdf
+roles:
+  - :admin
+  - :professional
