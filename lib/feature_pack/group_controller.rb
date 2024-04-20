@@ -1,4 +1,4 @@
-class MicroResources::GroupController < ApplicationController
+class FeaturePack::GroupController < ApplicationController
   before_action :set_group
   before_action :set_view_lookup_context_prefix
   before_action :set_layout_paths
@@ -10,7 +10,7 @@ class MicroResources::GroupController < ApplicationController
 
   def set_group
     group_name = params[:controller].split('/')[1].to_sym
-    @group = MicroResources.group(group_name) 
+    @group = FeaturePack.group(group_name) 
   end
 
   def set_view_lookup_context_prefix
