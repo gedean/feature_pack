@@ -65,6 +65,15 @@ module FeaturePack
       def group.feature(feature_name) = features.find { |p| p.name.eql?(feature_name) }
       def group.views_path = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views"
       def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"
+      def group.javascript(javascript_file_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/javascript/#{javascript_file_name}"
+
+      # FIX-ME (decouple Params class)
+      # def group.params_class = "#{name.name.camelize}::Params".constantize
+      # def group.manifest_class = "#{name.name.camelize}::Manifest".constantize
+
+      # FIX-ME (decouple Params class)
+      # def group.params = params_class.new(group.manifest)
+      # def group.manifest = manifest
 
       group
     end

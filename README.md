@@ -1,6 +1,10 @@
 # Feature Pack
 Organizes and sets up the architecture of micro-applications within a Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.
 
+
+## Javascript
+`Javascript` must be on the FeaturePack root dir, not inside views dir.
+
 ## Installation
 Meanwhile installer isn't done, follow the steps below to install FeaturePack GEM:
 
