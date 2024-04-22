@@ -65,7 +65,7 @@ module FeaturePack
       def group.feature(feature_name) = features.find { |p| p.name.eql?(feature_name) }
       def group.views_path = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views"
       def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"
-      def group.javascript(javascript_file_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/javascript/#{javascript_file_name}"
+      def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/javascript/#{javascript_file_name}"
 
       # FIX-ME (decouple Params class)
       # def group.params_class = "#{name.name.camelize}::Params".constantize
@@ -116,6 +116,7 @@ module FeaturePack
           # controller_path: relative_path.join('controller'),
           views_absolute_path: absolute_path.join('views'),
           views_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('views'),
+          javascript_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('javascript'),
           class_name: feature_class_name,
           # FIX-ME (decouple Params class)
           #params_class_name: params_class_name,
@@ -125,6 +126,7 @@ module FeaturePack
         # FIX-ME (decouple Params class)
         # def feature.params_class = params_class_name.constantize
         def feature.view(view_name) = "#{views_relative_path}/#{view_name}"
+        def feature.javascript_module(javascript_file_name) = "#{javascript_relative_path}/#{javascript_file_name}"
 
         group.features << feature
       end

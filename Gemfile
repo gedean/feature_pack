@@ -7,3 +7,4 @@ gem 'rails', '~> 7.1'
 gem 'rspec', '~> 3.13'
 
 gem 'activesupport', '~> 7.1'
+gem 'rubocop', '~> 7.1'
