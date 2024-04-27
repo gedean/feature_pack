@@ -67,14 +67,6 @@ module FeaturePack
       def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"
       def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/javascript/#{javascript_file_name}"
 
-      # FIX-ME (decouple Params class)
-      # def group.params_class = "#{name.name.camelize}::Params".constantize
-      # def group.manifest_class = "#{name.name.camelize}::Manifest".constantize
-
-      # FIX-ME (decouple Params class)
-      # def group.params = params_class.new(group.manifest)
-      # def group.manifest = manifest
-
       group
     end
 
@@ -85,10 +77,6 @@ module FeaturePack
         base_path = File.basename(feature_path, File::SEPARATOR)
         
         feature_name = base_path.gsub(FEATURE_ID_PATTERN, '').to_sym
-        feature_class_name = "#{group.name.name.camelize}::#{feature_name.name.camelize}"
-        
-        # FIX-ME (decouple Params class)
-        # params_class_name = "#{feature_pack_class_name}::Params"
         
         routes_file_path = relative_path.join('routes.rb')
 
@@ -117,15 +105,18 @@ module FeaturePack
           views_absolute_path: absolute_path.join('views'),
           views_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('views'),
           javascript_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('javascript'),
-          class_name: feature_class_name,
-          # FIX-ME (decouple Params class)
-          #params_class_name: params_class_name,
           manifest: YAML.load_file(File.join(feature_path, MANIFEST_FILE_NAME)).deep_symbolize_keys
         )
 
-        # FIX-ME (decouple Params class)
-        # def feature.params_class = params_class_name.constantize
-        def feature.view(view_name) = "#{views_relative_path}/#{view_name}"
+        def feature.class_name = "FeaturePack::#{group.name.name.camelize}::#{name.name.camelize}"
+        def feature.namespace = class_name.constantize
+
+        feature.manifest.fetch(:const_aliases, []).each do |alias_data|
+          alias_method_name, alias_const_name = alias_data.first
+          feature.define_singleton_method(alias_method_name) { "#{class_name}::#{alias_const_name}".constantize }
+        end
+
+        def feature.view(view_name) = "#{views_relative_path}/#{view_name}"       
         def feature.javascript_module(javascript_file_name) = "#{javascript_relative_path}/#{javascript_file_name}"
 
         group.features << feature
