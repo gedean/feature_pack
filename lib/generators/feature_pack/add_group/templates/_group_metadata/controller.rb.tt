@@ -1,0 +1,3 @@
+class FeaturePack::<%= class_name %>Controller < FeaturePack::GroupController
+  # 'home' already defined in RootGroupController
+end

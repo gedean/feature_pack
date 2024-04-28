@@ -1,0 +1,2 @@
+h1 Group <%= class_name%> Footer
+p = "Edit-me OR delete-me at #{__FILE__}"

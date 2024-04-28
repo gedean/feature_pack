@@ -4,7 +4,7 @@ module FeaturePack
   GROUP_ID_PATTERN = /^group_.*?_/.freeze
   FEATURE_ID_PATTERN = /^feature_.*?_/.freeze
   GROUP_METADATA_DIRECTORY = '_group_metadata'.freeze
-  MANIFEST_FILE_NAME = 'manifest.yml'.freeze
+  MANIFEST_FILE_NAME = 'manifest.yaml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
 
   ATTR_READERS = %i[

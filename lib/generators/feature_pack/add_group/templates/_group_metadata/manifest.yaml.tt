@@ -1,0 +1,3 @@
+name: Group Friendly Name Here
+url: <%= name.gsub('_', '-') %>
+namespace_only: false
