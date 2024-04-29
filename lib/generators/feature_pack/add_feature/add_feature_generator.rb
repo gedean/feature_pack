@@ -1,3 +1,6 @@
+require 'rails/generators/base'
+require 'rails/generators/named_base'
+
 class FeaturePack::AddFeatureGenerator < Rails::Generators::NamedBase
   desc 'Adds a new Feature'
   source_root File.expand_path('templates', __dir__)

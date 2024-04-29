@@ -1,5 +1,8 @@
+require 'rails/generators/base'
+require 'rails/generators/named_base'
+
 class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
-# class  Generators::FeaturePack::AddGroup::AddGroupGenerator < Rails::Generators::NamedBase
+
   desc 'Adds a new Feature Group'
   source_root File.expand_path('templates', __dir__)
 

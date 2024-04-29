@@ -39,7 +39,7 @@ module FeaturePack
     
     @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
 
-    raise "No Groups found in: '#{@@features_path}'" if Dir.glob("#{@@features_path}/[!_]*/").empty?
+    # raise "No Groups found in: '#{@@features_path}'" if Dir.glob("#{@@features_path}/[!_]*/").empty?
 
     @@groups = Dir.glob("#{@@features_path}/[!_]*/").map do |group_path|
       relative_path = Pathname.new(group_path)
