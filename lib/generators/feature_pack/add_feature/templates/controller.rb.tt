@@ -1,0 +1,3 @@
+class FeaturePack::<%= @group_class_name %>::<%= @feature_class_name %>Controller < FeaturePack::Controller
+  # home defined in parent controller
+end

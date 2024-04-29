@@ -1,0 +1,14 @@
+:name: Feature Friendly Name
+:description: 
+:type: :alert
+:url: <%= @feature_name.gsub('_', '-') %>
+:version: 1.0.0
+:policy:
+  :admin: '*'
+  :coordenacao_aps: '*'
+  :coordenacao_atividade_fisica: '*'
+  :coordenacao_saude_bucal:
+    - :lista_equipes_saude_bucal
+  :professional:
+    - :whatsapp_text_alert
+    - :whatsapp_protected_pdf

@@ -1,0 +1,2 @@
+h1 Feature <%= @group_class_name%>::<%=@feature_class_name %> Home
+p = "Find-me at #{__FILE__}"

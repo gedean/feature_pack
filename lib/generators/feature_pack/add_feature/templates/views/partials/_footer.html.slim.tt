@@ -1,0 +1,2 @@
+h1 Feature <%= @group_class_name %>::<%= @feature_class_name %> Footer
+p = "Edit-me OR delete-me at #{__FILE__}"

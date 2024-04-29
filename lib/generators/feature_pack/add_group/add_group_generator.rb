@@ -11,7 +11,7 @@ class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
     @class_name = name.camelcase
 
     # id can't contain underline '_'
-    group_id = name.gsub('_', '-') + '-' + 'GIVE-ME-AN-ID'
+    group_id = name.gsub('_', '-') + '-' + '999'
     group_dir = FeaturePack.features_path.join("group_#{group_id}_#{name}")
 
     template './_group_metadata/controller.rb.tt', group_dir.join('_group_metadata', 'controller.rb')
