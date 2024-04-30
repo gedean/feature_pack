@@ -62,6 +62,11 @@ module FeaturePack
         manifest: YAML.load_file(File.join(group_path, GROUP_METADATA_DIRECTORY, MANIFEST_FILE_NAME)).deep_symbolize_keys
       )
 
+      group.manifest.fetch(:const_aliases, []).each do |alias_data|
+        alias_method_name, alias_const_name = alias_data.first
+        group.define_singleton_method(alias_method_name) { "FeaturePack::#{group.name.name.camelize}::#{alias_const_name}".constantize }
+      end
+      
       def group.feature(feature_name) = features.find { |p| p.name.eql?(feature_name) }
       def group.views_path = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views"
       def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"

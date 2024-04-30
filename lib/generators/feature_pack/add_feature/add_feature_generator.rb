@@ -8,6 +8,8 @@ class FeaturePack::AddFeatureGenerator < Rails::Generators::NamedBase
   argument :name, type: :string, required: true, desc: 'The name (sneak case) of the group to add'
 
   def add_feature
+    raise "Feature name couldn't have more than one bar '/'" if name.count('/') > 1
+
     @group_name, @feature_name = name.split('/')
     @group = FeaturePack.group(@group_name.to_sym)
     @group_class_name = @group_name.camelcase

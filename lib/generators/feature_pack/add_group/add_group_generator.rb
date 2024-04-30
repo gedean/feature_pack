@@ -9,6 +9,7 @@ class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
   argument :name, type: :string, required: true, desc: 'The name (sneak case) of the group to add'
 
   def create_feature_group
+    raise "Group name couldn't have '/'" if name.include?('/')
     raise "Group '#{name}' already exists" if FeaturePack.group(name.to_sym).present?
 
     @class_name = name.camelcase

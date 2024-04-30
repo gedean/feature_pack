@@ -1,5 +1,5 @@
 class FeaturePack::Controller < ApplicationController
-  before_action :set_feature
+  before_action :set_group_and_feature
   before_action :set_view_lookup_context_prefix
   before_action :set_layout_paths
 
@@ -7,8 +7,10 @@ class FeaturePack::Controller < ApplicationController
 
   private
 
-  def set_feature
-    @feature = FeaturePack.feature *params['controller'].delete_prefix('feature_pack/').split('/').map(&:to_sym)
+  def set_group_and_feature
+    group_name, feature_name = params['controller'].delete_prefix('feature_pack/').split('/').map(&:to_sym)
+    @group = FeaturePack.group group_name
+    @feature = FeaturePack.feature group_name, feature_name
   end
 
   def set_view_lookup_context_prefix
