@@ -24,11 +24,5 @@ class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
     template './_group_metadata/views/home.html.slim.tt', group_dir.join('_group_metadata', 'views/home.html.slim')
     template './_group_metadata/views/partials/_header.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_header.html.slim')
     template './_group_metadata/views/partials/_footer.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_footer.html.slim')
-
-    # create_file "app/models/#{group_name.underscore}/#{name.underscore}.rb", <<-FILE
-    # class #{group_name.camelize}::#{name.camelize} < ApplicationRecord
-    #   # Lógicas específicas da feature, como validações e associações
-    # end
-    # FILE
   end
 end
