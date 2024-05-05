@@ -25,7 +25,7 @@ class FeaturePack::AddFeatureGenerator < Rails::Generators::NamedBase
     template './controller.rb.tt', @feature_dir.join('controller.rb')
     template './manifest.yaml.tt', @feature_dir.join('manifest.yaml')
     template './routes.rb.tt', @feature_dir.join('routes.rb')
-    template './views/home.html.slim.tt', @feature_dir.join('views/home.html.slim')
+    template './views/index.html.slim.tt', @feature_dir.join('views/index.html.slim')
     template './views/partials/_header.html.slim.tt', @feature_dir.join('views/partials/_header.html.slim')
     template './views/partials/_footer.html.slim.tt', @feature_dir.join('views/partials/_footer.html.slim')
     template './doc/readme.md.tt', @feature_dir.join('doc/readme.md')

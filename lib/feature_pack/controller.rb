@@ -3,7 +3,7 @@ class FeaturePack::Controller < ApplicationController
   before_action :set_view_lookup_context_prefix
   before_action :set_layout_paths
 
-  def home; end
+  def index; end
 
   private
 

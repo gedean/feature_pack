@@ -1,2 +1,0 @@
-h1 Group <%= class_name%> Home
-p = "Find-me at #{__FILE__}"

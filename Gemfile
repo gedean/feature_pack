@@ -2,9 +2,9 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 7.1'
+gem 'rails'
 
-gem 'rspec', '~> 3.13'
+gem 'rspec'
 
-gem 'activesupport', '~> 7.1'
-gem 'rubocop', '~> 7.1'
+gem 'activesupport'
+gem 'rubocop'

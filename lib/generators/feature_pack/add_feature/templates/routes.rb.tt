@@ -1,1 +1,1 @@
-get '/', to: '<%= @feature_name %>#home'
+get '/', to: '<%= @feature_name %>#index'

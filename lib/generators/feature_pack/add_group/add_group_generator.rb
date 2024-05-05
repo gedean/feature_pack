@@ -21,7 +21,7 @@ class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
     template './_group_metadata/controller.rb.tt', group_dir.join('_group_metadata', 'controller.rb')
     template './_group_metadata/manifest.yaml.tt', group_dir.join('_group_metadata', 'manifest.yaml')
     template './_group_metadata/routes.rb.disabled.tt', group_dir.join('_group_metadata', 'routes.rb.disabled')
-    template './_group_metadata/views/home.html.slim.tt', group_dir.join('_group_metadata', 'views/home.html.slim')
+    template './_group_metadata/views/index.html.slim.tt', group_dir.join('_group_metadata', 'views/index.html.slim')
     template './_group_metadata/views/partials/_header.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_header.html.slim')
     template './_group_metadata/views/partials/_footer.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_footer.html.slim')
   end
