@@ -17,7 +17,7 @@ module FeaturePack
     javascript_files_paths
   ].freeze
 
-  def self.setup(features_path:)   
+  def self.setup(features_path:)
     raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
 
     @@path = Pathname.new(__dir__)
@@ -36,7 +36,7 @@ module FeaturePack
       .map { |js_path| js_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '') }.to_a
 
     ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
-    
+
     @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
 
     # raise "No Groups found in: '#{@@features_path}'" if Dir.glob("#{@@features_path}/[!_]*/").empty?
@@ -49,7 +49,7 @@ module FeaturePack
       routes_file = File.exist?(File.join(group_path, GROUP_METADATA_DIRECTORY, 'routes.rb')) ? File.join(base_path, GROUP_METADATA_DIRECTORY, 'routes') : nil
 
       @@groups_controllers_paths << File.join(group_path, GROUP_METADATA_DIRECTORY, CONTROLLER_FILE_NAME)
-      
+
       raise "Group '#{base_path}' does not have a valid ID" if base_path.scan(GROUP_ID_PATTERN).empty?
       group = OpenStruct.new(
         id: base_path.scan(GROUP_ID_PATTERN).first.delete_suffix('_'),
@@ -66,7 +66,7 @@ module FeaturePack
         alias_method_name, alias_const_name = alias_data.first
         group.define_singleton_method(alias_method_name) { "FeaturePack::#{group.name.name.camelize}::#{alias_const_name}".constantize }
       end
-      
+
       def group.feature(feature_name) = features.find { |p| p.name.eql?(feature_name) }
       def group.views_path = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views"
       def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"
@@ -80,16 +80,16 @@ module FeaturePack
         absolute_path = @@features_path.join(feature_path)
         relative_path = Pathname.new(feature_path)
         base_path = File.basename(feature_path, File::SEPARATOR)
-        
+
         feature_name = base_path.gsub(FEATURE_ID_PATTERN, '').to_sym
-        
+
         routes_file_path = relative_path.join('routes.rb')
 
         # The custom routes file loads before the Rails default routes,
         # leading to errors like NoMethodError for 'scope'.
         # Ignoring them is required to prevent these issues.
         @@ignored_paths << routes_file_path
-        
+
         # Due to Zeiwerk rules, Controllers have special load process
         @@features_controllers_paths << relative_path.join(CONTROLLER_FILE_NAME)
 
