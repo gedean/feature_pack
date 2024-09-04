@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.3.1] 2024-08-30
+- Fixes references to index, instead of home
+
 ## [0.2.0] 2024-05-05
 - Moved `home` to `index` default action
 - Pluralized `index` action as the rails convention, so 'car', becomes 'cars'
