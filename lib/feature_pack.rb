@@ -3,7 +3,7 @@ require 'active_support/all'
 module FeaturePack
   GROUP_ID_PATTERN = /^group_.*?_/.freeze
   FEATURE_ID_PATTERN = /^feature_.*?_/.freeze
-  GROUP_METADATA_DIRECTORY = '_group_metadata'.freeze
+  GROUP_SPACE_DIRECTORY = '_group_space'.freeze
   MANIFEST_FILE_NAME = 'manifest.yaml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
 
@@ -46,20 +46,20 @@ module FeaturePack
       base_path = File.basename(group_path, File::SEPARATOR)
 
       # On route draw call, the extension is ignored
-      routes_file = File.exist?(File.join(group_path, GROUP_METADATA_DIRECTORY, 'routes.rb')) ? File.join(base_path, GROUP_METADATA_DIRECTORY, 'routes') : nil
+      routes_file = File.exist?(File.join(group_path, GROUP_SPACE_DIRECTORY, 'routes.rb')) ? File.join(base_path, GROUP_SPACE_DIRECTORY, 'routes') : nil
 
-      @@groups_controllers_paths << File.join(group_path, GROUP_METADATA_DIRECTORY, CONTROLLER_FILE_NAME)
+      @@groups_controllers_paths << File.join(group_path, GROUP_SPACE_DIRECTORY, CONTROLLER_FILE_NAME)
 
       raise "Group '#{base_path}' does not have a valid ID" if base_path.scan(GROUP_ID_PATTERN).empty?
       group = OpenStruct.new(
         id: base_path.scan(GROUP_ID_PATTERN).first.delete_suffix('_'),
         name: base_path.gsub(GROUP_ID_PATTERN, '').to_sym,
-        metadata_path: @@features_path.join(group_path, GROUP_METADATA_DIRECTORY),
+        metadata_path: @@features_path.join(group_path, GROUP_SPACE_DIRECTORY),
         relative_path: relative_path,
         base_dir: File.basename(relative_path, File::SEPARATOR),
         routes_file: routes_file,
         features: [],
-        manifest: YAML.load_file(File.join(group_path, GROUP_METADATA_DIRECTORY, MANIFEST_FILE_NAME)).deep_symbolize_keys
+        manifest: YAML.load_file(File.join(group_path, GROUP_SPACE_DIRECTORY, MANIFEST_FILE_NAME)).deep_symbolize_keys
       )
 
       group.manifest.fetch(:const_aliases, []).each do |alias_data|
@@ -68,9 +68,9 @@ module FeaturePack
       end
 
       def group.feature(feature_name) = features.find { |p| p.name.eql?(feature_name) }
-      def group.views_path = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views"
-      def group.view(view_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/views/#{view_name}"
-      def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_METADATA_DIRECTORY}/javascript/#{javascript_file_name}"
+      def group.views_path = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views"
+      def group.view(view_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views/#{view_name}"
+      def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/javascript/#{javascript_file_name}"
 
       group
     end
@@ -121,7 +121,7 @@ module FeaturePack
           feature.define_singleton_method(alias_method_name) { "#{class_name}::#{alias_const_name}".constantize }
         end
 
-        def feature.view(view_name) = "#{views_relative_path}/#{view_name}"       
+        def feature.view(view_name) = "#{views_relative_path}/#{view_name}"
         def feature.javascript_module(javascript_file_name) = "#{javascript_relative_path}/#{javascript_file_name}"
 
         group.features << feature

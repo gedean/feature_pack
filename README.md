@@ -51,7 +51,7 @@ FeaturePack.groups.each do |group|
   group_module = FeaturePack.const_set(group.name.name.camelize, Module.new)
 
   %w[Lib AI Jobs].each do |submodule_name|
-    submodule_path = File.join(group.relative_path, '_group_metadata', submodule_name.downcase)
+    submodule_path = File.join(group.relative_path, '_group_space', submodule_name.downcase)
     if Dir.exist?(submodule_path)
       submodule = group_module.const_set(submodule_name, Module.new)
       Rails.autoloaders.main.push_dir(submodule_path, namespace: submodule)

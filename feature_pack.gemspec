@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name          = 'feature_pack'
-  s.version       = '0.3.1'
-  s.date          = '2024-08-30'
+  s.version       = '0.4.0'
+  s.date          = '2024-10-25'
   s.platform      = Gem::Platform::RUBY
   s.summary       = 'New way to organize app features in Rails.'
   s.description   = 'Organizes and sets up the architecture of micro-applications within a Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.'

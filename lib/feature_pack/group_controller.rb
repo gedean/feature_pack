@@ -5,7 +5,7 @@ class FeaturePack::GroupController < ApplicationController
 
   def index; end
 
-  private 
+  private
 
   def set_group
     group_name = params[:controller].split('/')[1].to_sym
@@ -20,13 +20,13 @@ class FeaturePack::GroupController < ApplicationController
 
   def set_layout_paths
     patials_path = @group.views_path.concat('/partials')
-    
+
     if template_exists?('header', patials_path, true)
       @header_layout_path = @group.view('partials/header')
     end
 
     if template_exists?('footer', patials_path, true)
       @footer_layout_path = @group.view('partials/footer')
-    end    
+    end
   end
 end

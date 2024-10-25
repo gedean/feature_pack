@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.4.0] 2024-10-25
+- Reorganized group files to Group _group_space dir
+
 ## [0.3.1] 2024-08-30
 - Fixes references to index, instead of home
 

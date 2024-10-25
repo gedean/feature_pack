@@ -87,7 +87,7 @@ The library expects the following file structure:
 ```
 features_path/
 ├── group_name_1/
-│   ├── _group_metadata/
+│   ├── _group_space/
 │   │   ├── manifest.yaml
 │   │   ├── controller.rb
 │   │   └── routes.rb (optional)

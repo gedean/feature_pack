@@ -18,11 +18,11 @@ class FeaturePack::AddGroupGenerator < Rails::Generators::NamedBase
     group_id = name.gsub('_', '-') + '-' + '999'
     group_dir = FeaturePack.features_path.join("group_#{group_id}_#{name}")
 
-    template './_group_metadata/controller.rb.tt', group_dir.join('_group_metadata', 'controller.rb')
-    template './_group_metadata/manifest.yaml.tt', group_dir.join('_group_metadata', 'manifest.yaml')
-    template './_group_metadata/routes.rb.disabled.tt', group_dir.join('_group_metadata', 'routes.rb.disabled')
-    template './_group_metadata/views/index.html.slim.tt', group_dir.join('_group_metadata', 'views/index.html.slim')
-    template './_group_metadata/views/partials/_header.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_header.html.slim')
-    template './_group_metadata/views/partials/_footer.html.slim.tt', group_dir.join('_group_metadata', 'views/partials/_footer.html.slim')
+    template './_group_space/controller.rb.tt', group_dir.join('_group_space', 'controller.rb')
+    template './_group_space/manifest.yaml.tt', group_dir.join('_group_space', 'manifest.yaml')
+    template './_group_space/routes.rb.disabled.tt', group_dir.join('_group_space', 'routes.rb.disabled')
+    template './_group_space/views/index.html.slim.tt', group_dir.join('_group_space', 'views/index.html.slim')
+    template './_group_space/views/partials/_header.html.slim.tt', group_dir.join('_group_space', 'views/partials/_header.html.slim')
+    template './_group_space/views/partials/_footer.html.slim.tt', group_dir.join('_group_space', 'views/partials/_footer.html.slim')
   end
 end

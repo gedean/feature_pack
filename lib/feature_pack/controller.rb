@@ -16,7 +16,7 @@ class FeaturePack::Controller < ApplicationController
   def set_view_lookup_context_prefix
     unless lookup_context.prefixes.include?(@feature.views_relative_path)
       lookup_context.prefixes.prepend(@feature.views_relative_path)
-    end    
+    end
   end
 
   def set_layout_paths
@@ -30,7 +30,7 @@ class FeaturePack::Controller < ApplicationController
 
     feature_partials_path = @feature.views_relative_path.join('partials')
     group_partials_path = @feature.group.views_path.concat('/partials')
-    
+
     if template_exists?('header', feature_partials_path, true)
       @header_layout_path = @feature.view('partials/header')
     elsif template_exists?('header', group_partials_path, true)
