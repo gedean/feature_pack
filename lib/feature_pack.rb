@@ -17,13 +17,13 @@ module FeaturePack
     javascript_files_paths
   ].freeze
 
-  def self.setup(features_path:)
+  def self.setup()
     raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
 
     @@path = Pathname.new(__dir__)
     load @@path.join('feature_pack/error.rb')
 
-    @@features_path = Pathname.new(features_path)
+    @@features_path = Pathname.new(Rails.root.join('app/feature_packs'))
     raise "Invalid features_path: '#{@@features_path}'" if @@features_path.nil?
     raise "Inexistent features_path: '#{@@features_path}'" unless Dir.exist?(@@features_path)
 
