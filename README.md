@@ -1,94 +1,37 @@
-# Feature Pack
-Organizes and sets up the architecture of micro-applications within a Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.
+# Feature Pack Gem
+Organizes and sets up the architecture of micro-applications within a Ruby On Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.
 
+## Code and Folder Structure
 
-## Javascript
-`Javascript` must be on the FeaturePack root dir, not inside views dir.
+### Group
+A group is a collection of related features. Groups are represented as directories in the `app/feature_packs` folder. Each group contains a `_group_space` directory that holds group-level views and JavaScript files. Group directories follow this naming pattern:
 
-## Installation
-Meanwhile installer isn't done, follow the steps below to install FeaturePack GEM:
+#### Naming Convention
+Sample: `group_areas-tecnicas-040000_atencao_especializada`
 
-```ruby
-# Add feature_pack to Gemfile
-gem 'feature_pack'
+`group_` prefix is followed by the group identification (required)
+`areas-tecnicas-040000` between `group_` and class name, exists only for organization purposes. The bounds are `group_` and next underscore `_`
+`atencao_especializada` class name of the group (required)
+
+The `_group_space` directory contains:
+
+- `views/` - Views of the group
+#### Common Files in _group_space/views
+
+The `_group_space/views` directory typically contains these common files:
+
 ```
-
-```bash
-bundle install
+_group_space/views/
+├── index.html.slim    # Default view for the group
+└── partials/
+    └── _header.html.slim # Base header template for the group
+    └── _footer.html.slim # Base footer template for the group
 ```
+Can have more views and partials, depending on the defined on `controller.rb` but these are the most common ones.
 
-Setup loading 
-```ruby
-# config/application.rb
+- `javascript/` - Group-level JavaScript modules shared across features
+- `controller.rb` - Base controller class for the group's features
+- `routes.rb` - The route are used only if the group has more than the default `index` action/view.
 
-  feature_packs_path = Rails.root.join('app/feature_packs')
-  FeaturePack.setup(features_path: feature_packs_path)
-
-  FeaturePack.ignored_paths.each { |path| Rails.autoloaders.main.ignore(Rails.root.join(path)) }
-
-  config.eager_load_paths << FeaturePack.features_path
-  config.paths['app/views'] << FeaturePack.features_path
-
-  config.paths['config/routes'] << (FeaturePack.path.to_s << '/feature_pack')
-  config.paths['config/routes'] << FeaturePack.features_path
-  config.assets.paths << FeaturePack.features_path.to_s
-
-  Zeitwerk::Loader.eager_load_all
-
-  config.after_initialize do
-    load FeaturePack.path.join('feature_pack/group_controller.rb')
-    load FeaturePack.path.join('feature_pack/controller.rb')
-
-    FeaturePack.groups_controllers_paths.each { |group_controller_path| load group_controller_path }
-    FeaturePack.features_controllers_paths.each { |controller_path| load controller_path }
-  end
-```
-
-```ruby
-# initializers/feature_pack.rb
-
-FeaturePack.groups.each do |group|
-  group_module = FeaturePack.const_set(group.name.name.camelize, Module.new)
-
-  %w[Lib AI Jobs].each do |submodule_name|
-    submodule_path = File.join(group.relative_path, '_group_space', submodule_name.downcase)
-    if Dir.exist?(submodule_path)
-      submodule = group_module.const_set(submodule_name, Module.new)
-      Rails.autoloaders.main.push_dir(submodule_path, namespace: submodule)
-    end
-  end
-
-  group.features.each do |feature|
-    feature_module = group_module.const_set(feature.name.name.camelize, Module.new)
-    Rails.autoloaders.main.push_dir(feature.relative_path, namespace: feature_module)
-  end
-end
-```
-
-```ruby
-# app/helpers/application_helper.rb
-  def feature_pack_group_path(group, *params) = send("feature_pack_#{group.name}_path".to_sym, *params)
-  def feature_pack_path(group, feature, *params) = send("feature_pack_#{group.name}_#{feature.name}_path".to_sym, *params)
-```
-
-```ruby
-# config/initializers/assets.rb
-
-Rails.application.config.assets.precompile += FeaturePack.javascript_files_paths
-```
-
-```ruby
-# config/importmap.rb
-
-FeaturePack.javascript_files_paths.each do |js_file_path|
-  extensionless_js_file_path = js_file_path.delete_suffix('.js')
-  pin extensionless_js_file_path, to: extensionless_js_file_path, preload: false
-end
-```
-
-```ruby
-# config/routes.rb
-namespace :feature_pack, path: nil do
-  draw :feature_pack_routes
-end
-```
+### Feature
+A feature is a single feature that can be added to a group. Feature naming patter is the same of group, but without the `group_` prefix.

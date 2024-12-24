@@ -5,7 +5,7 @@
 :version: 1.0.0
 #const_aliases:
 #  - :params_class: 'Processor::Params'
-:policy:
+:access_policy:
   :admin: '*'
   :coordenacao_aps: '*'
   :coordenacao_atividade_fisica: '*'

@@ -9,7 +9,7 @@ class FeaturePack::GroupController < ApplicationController
 
   def set_group
     group_name = params[:controller].split('/')[1].to_sym
-    @group = FeaturePack.group(group_name) 
+    @group = FeaturePack.group(group_name)
   end
 
   def set_view_lookup_context_prefix
