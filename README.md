@@ -33,6 +33,11 @@ Can have more views and partials, depending on the defined on `controller.rb` bu
 - `controller.rb` - Base controller class for the group's features
 - `routes.rb` - The route are used only if the group has more than the default `index` action/view.
 
+#### How implement a new Group
+```
+rails generate feature_pack:add_gruop <group_name>
+```
+
 ### Feature
 A feature is a single feature that can be added to a group. Feature naming patter is the same of group, but without the `group_` prefix.
 
