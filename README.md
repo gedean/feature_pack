@@ -35,3 +35,11 @@ Can have more views and partials, depending on the defined on `controller.rb` bu
 
 ### Feature
 A feature is a single feature that can be added to a group. Feature naming patter is the same of group, but without the `group_` prefix.
+
+#### Feature Routes
+Every feature has a default route, which is the `index` action/view. If the feature has more than the default `index` action/view, the routes are defined in the `routes.rb` file.
+
+#### How implement a new feature
+```
+rails generate feature_pack:add_feature <group_name>/<feature_name>
+```
