@@ -52,8 +52,9 @@ rails generate feature_pack:add_feature <group_name>/<feature_name>
 #### Helpers
 
 ```ruby
-def feature_pack_group_path(group, *params) = send("feature_pack_#{group.name}_path".to_sym, *params)
-def feature_pack_path(group, feature, *params) = send("feature_pack_#{group.name}_#{feature.name}_path".to_sym, *params)
+# Application Helper
+def feature_pack_group_path(group_name, *params) = send("feature_pack_#{group_name}_path".to_sym, *params)
+def feature_pack_path(group_name, feature_name, *params) = send("feature_pack_#{group_name}_#{feature_name}_path".to_sym, *params)
 ```
 
 ## Helpers
