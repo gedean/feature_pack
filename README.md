@@ -49,7 +49,33 @@ Every feature has a default route, which is the `index` action/view. If the feat
 rails generate feature_pack:add_feature <group_name>/<feature_name>
 ```
 
-#### Helpers```ruby
+#### Helpers
+
+```ruby
 def feature_pack_group_path(group, *params) = send("feature_pack_#{group.name}_path".to_sym, *params)
 def feature_pack_path(group, feature, *params) = send("feature_pack_#{group.name}_#{feature.name}_path".to_sym, *params)
 ```
+
+## Helpers
+
+### Using the `feature_pack_group_path` and `feature_pack_path` Helpers
+
+The `feature_pack_group_path` and `feature_pack_path` helpers are used to generate URLs for specific groups and features within the feature package system.
+
+- `feature_pack_group_path(group, *params)`: Generates the path for a specific group. The `group` parameter should be an object representing the desired group. Additional parameters can be passed to specify more details in the URL.
+  
+  **Usage example:**
+  ```ruby
+  # Assuming `group` is a valid group name in symbol
+  group_url = feature_pack_group_path(:group_name)
+  ```
+
+- `feature_pack_path(group, feature, *params)`: Generates the path for a specific feature within a group. The `group` and `feature` parameters should be symbols of group and feature name, respectively. Additional parameters can be passed to specify more details in the URL.
+  
+  **Usage example:**
+  ```ruby
+  # Assuming `group` and `feature` are valid objects
+  feature_url = feature_pack_path(:my_group, :my_feature)
+  ```
+
+These helpers are useful for maintaining consistency and clarity when generating URLs within the application, ensuring that routes are correctly constructed based on the provided group and feature names.
