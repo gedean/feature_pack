@@ -49,11 +49,6 @@ Every feature has a default route, which is the `index` action/view. If the feat
 rails generate feature_pack:add_feature <group_name>/<feature_name>
 ```
 
-#### Variables
-Current group and feature are available in the controller (so as in the views too) as `@group` and `@feature` variables.
-@feature variable is not available in the group controller.
-@group variable is available in the group controller and in the its features controllers.
-
 #### Helpers
 
 ```ruby
@@ -85,3 +80,8 @@ The `feature_pack_group_path` and `feature_pack_path` helpers are used to genera
   ```
 
 These helpers are useful for maintaining consistency and clarity when generating URLs within the application, ensuring that routes are correctly constructed based on the provided group and feature names.
+
+## Variables
+Current group and feature are available in the controller (so as in the views too) as `@group` and `@feature` variables.
+@feature variable is not available in the group controller.
+@group variable is available in the group controller and in the its features controllers.
