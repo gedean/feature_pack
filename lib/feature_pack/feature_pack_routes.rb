@@ -1,20 +1,15 @@
 FeaturePack.groups.each do |group|
-  unless group.manifest[:namespace_only]
-    # Default 'index' route every group has to have.
-    get group.manifest[:url],
-        to: "#{group.name.name}#index",
-        as: group.name.name
+  scope group.manifest[:url], as: group.name do
+    raise "Group '#{group.name}' routes file not found in #{group.metadata_path}" if group.routes_file.nil?
 
-    unless group.routes_file.nil?
-      scope group.manifest[:url] do
-        draw(group.routes_file)
-      end
-    end
+    draw(group.routes_file)
   end
 
   namespace group.name, path: group.manifest[:url] do
     group.features.each do |feature|
-      scope feature.manifest[:url], as: feature.name.name.pluralize do
+      scope feature.manifest[:url], as: feature.name do
+        raise "Feature '#{feature.name}' routes file not found in #{feature.routes_file}" if feature.routes_file.nil?
+
         draw(feature.routes_file)
       end
     end

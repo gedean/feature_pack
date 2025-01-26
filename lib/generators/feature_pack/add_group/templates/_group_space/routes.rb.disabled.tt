@@ -1,3 +1,0 @@
-# You don't need enable this file if the only action is 'index'
-
-get '/action-name-url', to: '<%= name %>#action_name'
