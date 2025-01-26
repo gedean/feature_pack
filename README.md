@@ -7,11 +7,15 @@ Organizes and sets up the architecture of micro-applications within a Ruby On Ra
 A group is a collection of related features. Groups are represented as directories in the `app/feature_packs` folder. Each group contains a `_group_space` directory that holds group-level views and JavaScript files. Group directories follow this naming pattern:
 
 #### Naming Convention
-Sample: `group_areas-tecnicas-040000_atencao_especializada`
+Sample: `group_departments-100100_human_resources`
 
 `group_` prefix is followed by the group identification (required)
-`areas-tecnicas-040000` between `group_` and class name, exists only for organization purposes. The bounds are `group_` and next underscore `_`
-`atencao_especializada` class name of the group (required)
+`departments-100100` between `group_` and class name, exists only for organization purposes. The bounds are `group_` and next underscore `_`
+`human_resources` class name of the group (required)
+
+#### Note worthy
+Group name is the same as the class name. Its used internally in the backend code.
+The 'Name' within the manifest file (Group.manifest[:name]) is the name to be shown in the user interface.
 
 The `_group_space` directory contains:
 
@@ -31,7 +35,7 @@ Can have more views and partials, depending on the defined on `controller.rb` bu
 
 - `javascript/` - Group-level JavaScript modules shared across features
 - `controller.rb` - Base controller class for the group's features
-- `routes.rb` - The route are used only if the group has more than the default `index` action/view.
+- `routes.rb` - The routes files come with the default `index` action/view.
 
 #### How implement a new Group
 ```
