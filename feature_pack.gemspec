@@ -1,17 +1,26 @@
-Gem::Specification.new do |s|
-  s.name          = 'feature_pack'
-  s.version       = '0.7.0'
-  s.date          = '2025-01-26'
-  s.platform      = Gem::Platform::RUBY
-  s.summary       = 'A different way to organize app features in Rails.'
-  s.description   = 'Organizes and sets up the architecture of micro-applications within a Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.'
-  s.authors       = ['Gedean Dias']
-  s.email         = 'gedean.dias@gmail.com'
-  s.files         = Dir['README.md', 'lib/**/*', 'doc/**/*']
-  s.require_paths = ['lib']
-  s.required_ruby_version = '>= 3'
-  s.homepage      = 'https://github.com/gedean/feature_pack'
-  s.license       = 'MIT'
-  s.add_dependency 'activesupport', '>= 7.0', '< 9.0'
-  s.post_install_message = 'Please check readme file for use instructions.'
+Gem::Specification.new do |spec|
+  spec.name          = 'feature_pack'
+  spec.version       = '0.8.0'
+  spec.date          = '2025-02-09'
+  spec.platform      = Gem::Platform::RUBY
+  spec.summary       = 'A different approach to organizing Rails app features.'
+  spec.description   = <<~DESC
+    Organizes and sets up the architecture of micro-applications within a Rails application,
+    enabling segregation, management, and isolation of functionalities, thereby supporting
+    independent development, testing, and maintenance.
+  DESC
+  spec.authors       = ['Gedean Dias']
+  spec.email         = 'gedean.dias@gmail.com'
+  spec.files         = Dir.glob('README.md') + Dir.glob('lib/**/*') + Dir.glob('doc/**/*')
+  spec.require_paths = ['lib']
+  spec.required_ruby_version = '>= 3'
+  spec.homepage      = 'https://github.com/gedean/feature_pack'
+  spec.license       = 'MIT'
+  spec.add_dependency 'activesupport', '>= 7.0', '< 9.0'
+  spec.post_install_message = 'Please check the README file for use instructions.'
+  spec.metadata = {
+    'bug_tracker_uri' => 'https://github.com/gedean/feature_pack/issues',
+    'source_code_uri' => 'https://github.com/gedean/feature_pack',
+    'changelog_uri' => 'https://github.com/gedean/feature_pack/blob/main/CHANGELOG.MD'
+  }
 end
