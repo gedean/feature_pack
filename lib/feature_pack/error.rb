@@ -1,6 +1,7 @@
 module FeaturePack::Error
   class NoDataError < StandardError
-	end
+  end
+  
   class NoGroup < StandardError
-	end
+  end
 end

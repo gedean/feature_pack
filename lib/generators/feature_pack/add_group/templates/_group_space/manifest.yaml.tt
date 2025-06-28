@@ -1,2 +1,8 @@
-name: Group Friendly Name Here
-url: <%= name.gsub('_', '-') %>
+# Group manifest configuration
+name: <%= @class_name.humanize %>
+url: /<%= name.gsub('_', '-') %>
+
+# Optional: Define constant aliases for this group
+# const_aliases:
+#   - model_name: ModelClass
+#   - service_name: ServiceClass

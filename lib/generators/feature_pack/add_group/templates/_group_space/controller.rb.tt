@@ -1,3 +1,13 @@
-class FeaturePack::<%= class_name %>Controller < FeaturePack::GroupController
-  # 'index' already defined in RootGroupController
+# Group controller for <%= @class_name %>
+class FeaturePack::<%= @class_name %>Controller < FeaturePack::GroupController
+  # The 'index' action is already defined in the parent GroupController
+  # Add any group-wide functionality here that will be inherited by all features
+  
+  # Example:
+  # before_action :authenticate_user!
+  # before_action :check_permissions
+  
+  private
+  
+  # Add shared private methods for this group here
 end

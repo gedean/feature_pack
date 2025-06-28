@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.9.0] - 2025-06-28
+### Added
+- Comprehensive inline documentation for all classes and methods
+- Improved error handling with specific error classes
+- Better validation in generators with helpful error messages
+- Support for JavaScript directories in generators
+- Detailed README with examples and troubleshooting guide
+
+### Changed
+- Refactored main FeaturePack module for better organization and maintainability
+- Improved generator ID generation using timestamp format (YYMMDD)
+- Enhanced controller error handling with proper exceptions
+
+### Fixed
+- Fixed typo in group_controller.rb (patials_path -> partials_path)
+- Fixed inconsistent indentation in error.rb
+- Corrected generator argument descriptions
+
 ## [0.4.0] 2024-10-25
 - Reorganized group files to Group _group_space dir
 

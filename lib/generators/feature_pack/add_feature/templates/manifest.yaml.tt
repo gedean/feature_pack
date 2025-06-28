@@ -1,16 +1,17 @@
-:name: Feature Friendly Name
-:description: 
-:type: :alert
-:url: <%= @feature_name.gsub('_', '-') %>
-:version: 1.0.0
-#const_aliases:
-#  - :params_class: 'Processor::Params'
-:access_policy:
-  :admin: '*'
-  :coordenacao_aps: '*'
-  :coordenacao_atividade_fisica: '*'
-  :coordenacao_saude_bucal:
-    - :lista_equipes_saude_bucal
-  :professional:
-    - :whatsapp_text_alert
-    - :whatsapp_protected_pdf
+# Feature manifest configuration
+name: <%= @feature_class_name.humanize %>
+description: Description of <%= @feature_name.humanize %> feature
+url: /<%= @feature_name.gsub('_', '-') %>
+version: 1.0.0
+
+# Optional: Define constant aliases for this feature
+# const_aliases:
+#   - service: <%= @feature_class_name %>Service
+#   - repository: <%= @feature_class_name %>Repository
+
+# Optional: Define access policies
+# access_policy:
+#   admin: '*'
+#   user: 
+#     - index
+#     - show

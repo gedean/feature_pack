@@ -1,3 +1,30 @@
-class FeaturePack::<%= @group_class_name %>::<%= @feature_class_name %>Controller < FeaturePack::Controller
-  # index defined in parent controller
+# Feature controller for <%= @feature_class_name %>
+class FeaturePack::<%= @group_class_name %>::<%= @feature_class_name %>Controller < FeaturePack::<%= @group_class_name %>Controller
+  # The 'index' action is already defined in the parent controller
+  # Add your feature-specific actions and logic here
+  
+  # Example actions:
+  # def show
+  #   @item = find_item(params[:id])
+  # end
+  
+  # def new
+  #   @item = Item.new
+  # end
+  
+  # def create
+  #   @item = Item.new(item_params)
+  #   if @item.save
+  #     redirect_to feature_pack_path(:<%= @group_name %>, :<%= @feature_name %>)
+  #   else
+  #     render :new
+  #   end
+  # end
+  
+  private
+  
+  # Add feature-specific private methods here
+  # def item_params
+  #   params.require(:item).permit(:name, :description)
+  # end
 end

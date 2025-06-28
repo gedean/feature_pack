@@ -1,91 +1,297 @@
 # Feature Pack Gem
-Organizes and sets up the architecture of micro-applications within a Ruby On Rails application, enabling the segregation of code, management, and isolation of functionalities, which can be developed, tested, and maintained independently of each other.
 
-## Code and Folder Structure
+[![Gem Version](https://badge.fury.io/rb/feature_pack.svg)](https://badge.fury.io/rb/feature_pack)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### Group
-A group is a collection of related features. Groups are represented as directories in the `app/feature_packs` folder. Each group contains a `_group_space` directory that holds group-level views and JavaScript files. Group directories follow this naming pattern:
+Feature Pack organizes and sets up the architecture of micro-applications within a Ruby on Rails application, enabling the segregation of code, management, and isolation of functionalities. Features can be developed, tested, and maintained independently of each other.
 
-#### Naming Convention
-Sample: `group_departments-100100_human_resources`
+## Installation
 
-`group_` prefix is followed by the group identification (required)
-`departments-100100` between `group_` and class name, exists only for organization purposes. The bounds are `group_` and next underscore `_`
-`human_resources` class name of the group (required)
-
-#### Note worthy
-Group name is the same as the class name. Its used internally in the backend code.
-The 'Name' within the manifest file (Group.manifest[:name]) is the name to be shown in the user interface.
-
-The `_group_space` directory contains:
-
-- `views/` - Views of the group
-#### Common Files in _group_space/views
-
-The `_group_space/views` directory typically contains these common files:
-
-```
-_group_space/views/
-├── index.html.slim    # Default view for the group
-└── partials/
-    └── _header.html.slim # Base header template for the group
-    └── _footer.html.slim # Base footer template for the group
-```
-Can have more views and partials, depending on the defined on `controller.rb` but these are the most common ones.
-
-- `javascript/` - Group-level JavaScript modules shared across features
-- `controller.rb` - Base controller class for the group's features
-- `routes.rb` - The routes files come with the default `index` action/view.
-
-#### How implement a new Group
-```
-rails generate feature_pack:add_gruop <group_name>
-```
-
-### Feature
-A feature is a single feature that can be added to a group. Feature naming patter is the same of group, but without the `group_` prefix.
-
-#### Feature Routes
-Every feature has a default route, which is the `index` action/view. If the feature has more than the default `index` action/view, the routes are defined in the `routes.rb` file.
-
-#### How implement a new feature
-```
-rails generate feature_pack:add_feature <group_name>/<feature_name>
-```
-
-#### Helpers
+Add this line to your application's Gemfile:
 
 ```ruby
-# Application Helper
-def feature_pack_group_path(group_name, *params) = send("feature_pack_#{group_name}_path".to_sym, *params)
-def feature_pack_path(group_name, feature_name, *params) = send("feature_pack_#{group_name}_#{feature_name}_path".to_sym, *params)
+gem 'feature_pack'
 ```
+
+And then execute:
+
+```bash
+bundle install
+```
+
+## Setup
+
+Add to your `config/application.rb`:
+
+```ruby
+# After Bundler.require
+require 'feature_pack'
+FeaturePack.setup
+```
+
+## Concepts
+
+### Groups
+Groups are collections of related features. They provide:
+- Shared layouts and partials
+- Common base controller functionality
+- Namespace organization
+- Shared JavaScript modules
+
+### Features
+Features are individual functionalities within a group. They provide:
+- Independent controllers and views
+- Isolated routes
+- Feature-specific JavaScript
+- Complete MVC structure
+
+## Usage
+
+### Creating a New Group
+
+```bash
+rails generate feature_pack:add_group human_resources
+```
+
+This creates the following structure:
+```
+app/feature_packs/
+└── group_YYMMDD_human_resources/
+    └── _group_space/
+        ├── controller.rb
+        ├── manifest.yaml
+        ├── routes.rb
+        ├── javascript/
+        └── views/
+            ├── index.html.slim
+            └── partials/
+                ├── _header.html.slim
+                └── _footer.html.slim
+```
+
+### Creating a New Feature
+
+```bash
+rails generate feature_pack:add_feature human_resources/employees
+```
+
+This creates:
+```
+app/feature_packs/
+└── group_YYMMDD_human_resources/
+    └── feature_YYMMDD_employees/
+        ├── controller.rb
+        ├── manifest.yaml
+        ├── routes.rb
+        ├── doc/
+        │   └── readme.md
+        ├── javascript/
+        ├── queries/
+        └── views/
+            ├── index.html.slim
+            └── partials/
+                ├── _header.html.slim
+                └── _footer.html.slim
+```
+
+## Code Structure
+
+### Naming Convention
+
+#### Groups
+Format: `group_<id>_<name>`
+- `group_` - Required prefix
+- `<id>` - Unique identifier (typically YYMMDD format)
+- `<name>` - Group name in snake_case
+
+Example: `group_241209_human_resources`
+
+#### Features
+Format: `feature_<id>_<name>`
+- `feature_` - Required prefix
+- `<id>` - Unique identifier (typically YYMMDD format)
+- `<name>` - Feature name in snake_case
+
+Example: `feature_241209_employees`
+
+### Directory Structure
+
+#### Group Space (`_group_space`)
+Contains group-level resources:
+- `controller.rb` - Base controller for all features in the group
+- `manifest.yaml` - Group configuration
+- `routes.rb` - Group-level routes
+- `views/` - Shared views and layouts
+- `javascript/` - Shared JavaScript modules
+
+#### Feature Directory
+Contains feature-specific resources:
+- `controller.rb` - Feature controller
+- `manifest.yaml` - Feature configuration
+- `routes.rb` - Feature routes
+- `views/` - Feature views
+- `javascript/` - Feature-specific JavaScript
+- `queries/` - Database queries
+- `doc/` - Feature documentation
+
+## Controllers
+
+### Group Controller
+```ruby
+class FeaturePack::HumanResourcesController < FeaturePack::GroupController
+  # Group-wide functionality
+end
+```
+
+### Feature Controller
+```ruby
+class FeaturePack::HumanResources::EmployeesController < FeaturePack::HumanResourcesController
+  def index
+    # Feature-specific logic
+  end
+end
+```
+
+## Routes
+
+Routes are automatically configured based on manifest files:
+
+```yaml
+# Group manifest.yaml
+url: /hr
+name: Human Resources
+
+# Feature manifest.yaml
+url: /employees
+name: Employees Management
+```
+
+This generates routes like:
+- `/hr` - Group index
+- `/hr/employees` - Feature index
 
 ## Helpers
 
-### Using the `feature_pack_group_path` and `feature_pack_path` Helpers
+### Path Helpers
 
-The `feature_pack_group_path` and `feature_pack_path` helpers are used to generate URLs for specific groups and features within the feature package system.
+```ruby
+# Group path
+feature_pack_group_path(:human_resources)
+# => "/hr"
 
-- `feature_pack_group_path(group, *params)`: Generates the path for a specific group. The `group` parameter should be an object representing the desired group. Additional parameters can be passed to specify more details in the URL.
-  
-  **Usage example:**
-  ```ruby
-  # Assuming `group` is a valid group name in symbol
-  group_url = feature_pack_group_path(:group_name)
-  ```
+# Feature path
+feature_pack_path(:human_resources, :employees)
+# => "/hr/employees"
 
-- `feature_pack_path(group, feature, *params)`: Generates the path for a specific feature within a group. The `group` and `feature` parameters should be symbols of group and feature name, respectively. Additional parameters can be passed to specify more details in the URL.
-  
-  **Usage example:**
-  ```ruby
-  # Assuming `group` and `feature` are valid objects
-  feature_url = feature_pack_path(:my_group, :my_feature)
-  ```
+# With parameters
+feature_pack_path(:human_resources, :employees, id: 1)
+# => "/hr/employees?id=1"
+```
 
-These helpers are useful for maintaining consistency and clarity when generating URLs within the application, ensuring that routes are correctly constructed based on the provided group and feature names.
+### Controller Variables
 
-## Variables
-Current group and feature are available in the controller (so as in the views too) as `@group` and `@feature` variables.
-@feature variable is not available in the group controller.
-@group variable is available in the group controller and in the its features controllers.
+Available in controllers and views:
+- `@group` - Current group object
+- `@feature` - Current feature object (not available in group controller)
+
+## View Hierarchy
+
+Views are resolved in the following order:
+1. Feature-specific views
+2. Group-shared views
+3. Application default views
+
+### Partials
+Header and footer partials follow a fallback pattern:
+1. Feature's `views/partials/_header.html.slim`
+2. Group's `views/partials/_header.html.slim`
+3. Application's default header
+
+## JavaScript Integration
+
+JavaScript files are automatically discovered and can be referenced:
+
+```ruby
+# In views
+javascript_include_tag @group.javascript_module('shared')
+javascript_include_tag @feature.javascript_module('employees')
+```
+
+## Advanced Configuration
+
+### Manifest Files
+
+Group manifest (`_group_space/manifest.yaml`):
+```yaml
+url: /hr
+name: Human Resources
+const_aliases:
+  - employee_model: Employee
+  - department_model: Department
+```
+
+Feature manifest:
+```yaml
+url: /employees
+name: Employees Management
+const_aliases:
+  - service: EmployeeService
+```
+
+### Const Aliases
+
+Access aliased constants:
+```ruby
+# In controllers
+@group.employee_model  # => Employee
+@feature.service       # => FeaturePack::HumanResources::Employees::EmployeeService
+```
+
+## Best Practices
+
+1. **Group Organization**: Group related features that share common functionality
+2. **Naming**: Use descriptive snake_case names for groups and features
+3. **Isolation**: Keep features independent and loosely coupled
+4. **Shared Resources**: Place common code in group space
+5. **Documentation**: Document each feature in its `doc/readme.md`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Group/Feature Not Found**
+   - Ensure proper naming convention
+   - Run `FeaturePack.setup` after adding new groups/features
+   - Check manifest files exist
+
+2. **Routes Not Working**
+   - Verify manifest.yaml has correct URL configuration
+   - Check routes.rb files exist
+   - Restart Rails server after changes
+
+3. **Views Not Rendering**
+   - Check view file extensions (.html.slim, .html.erb, etc.)
+   - Verify view paths in controller
+   - Check for typos in view names
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Author
+
+Gedean Dias - gedean.dias@gmail.com
+
+## Links
+
+- [GitHub Repository](https://github.com/gedean/feature_pack)
+- [RubyGems](https://rubygems.org/gems/feature_pack)
+- [Bug Reports](https://github.com/gedean/feature_pack/issues)
