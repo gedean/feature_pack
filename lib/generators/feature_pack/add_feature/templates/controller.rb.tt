@@ -1,5 +1,5 @@
 # Feature controller for <%= @feature_class_name %>
-class FeaturePack::<%= @group_class_name %>::<%= @feature_class_name %>Controller < FeaturePack::<%= @group_class_name %>Controller
+class FeaturePack::<%= @group_class_name %>::<%= @feature_class_name %>Controller < FeaturePack::Controller
   # The 'index' action is already defined in the parent controller
   # Add your feature-specific actions and logic here
   
