@@ -1,0 +1,11 @@
+# Hook executado após a inicialização da feature <%= @feature_class_name %>
+# Este arquivo é executado no contexto do objeto feature
+# Você tem acesso a todas as propriedades da feature através de 'self'
+#
+# Exemplo de uso:
+# puts "Feature #{name} foi inicializada!"
+# puts "Grupo da feature: #{group.name}"
+# puts "Caminho absoluto: #{absolute_path}"
+# puts "Namespace: #{namespace}"
+#
+# Adicione seu código customizado abaixo:

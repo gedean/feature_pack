@@ -1,0 +1,10 @@
+# Hook executado após a inicialização do grupo <%= @class_name %>
+# Este arquivo é executado no contexto do objeto group
+# Você tem acesso a todas as propriedades do grupo através de 'self'
+#
+# Exemplo de uso:
+# puts "Grupo #{name} foi inicializado!"
+# puts "Caminho do grupo: #{absolute_path}"
+# puts "Features do grupo: #{features.map(&:name).join(', ')}"
+#
+# Adicione seu código customizado abaixo:

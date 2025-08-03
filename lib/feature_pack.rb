@@ -11,6 +11,7 @@ module FeaturePack
   GROUP_SPACE_DIRECTORY = '_group_space'.freeze
   MANIFEST_FILE_NAME = 'manifest.yaml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
+  AFTER_INITIALIZE_FILE_NAME = '__after_initialize.rb'.freeze
 
   # Attribute readers that will be dynamically defined
   ATTR_READERS = %i[
@@ -39,9 +40,7 @@ module FeaturePack
     # Finds a group by name
     # @param group_name [Symbol] The name of the group
     # @return [OpenStruct, nil] The group object or nil if not found
-    def group(group_name)
-      @@groups.find { |g| g.name.eql?(group_name) }
-    end
+    def group(group_name) = @@groups.find { it.name.eql?(group_name) }
 
     # Finds a feature within a group
     # @param group_name [Symbol] The name of the group
@@ -68,9 +67,7 @@ module FeaturePack
       @@javascript_files_paths = discover_javascript_files
     end
 
-    def load_dependencies
-      load @@path.join('feature_pack/error.rb')
-    end
+    def load_dependencies = load @@path.join('feature_pack/error.rb')
 
     def validate_features_path!
       raise "Invalid features_path: '#{@@features_path}'" if @@features_path.nil?
@@ -86,14 +83,11 @@ module FeaturePack
     def finalize_setup
       ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
       @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
+      execute_after_initialize_hooks
       @@setup_executed_flag = true
     end
 
-    def discover_groups
-      @@groups = Dir.glob("#{@@features_path}/[!_]*/").map do |group_path|
-        build_group(group_path)
-      end
-    end
+    def discover_groups = @@groups = Dir.glob("#{@@features_path}/[!_]*/").map { build_group(it) }
 
     def build_group(group_path)
       relative_path = Pathname.new(group_path)
@@ -148,8 +142,8 @@ module FeaturePack
     end
 
     def setup_group_aliases(group)
-      group.manifest.fetch(:const_aliases, []).each do |alias_data|
-        alias_method_name, alias_const_name = alias_data.first
+      group.manifest.fetch(:const_aliases, []).each do
+        alias_method_name, alias_const_name = it.first
         group.define_singleton_method(alias_method_name) do
           "FeaturePack::#{group.name.to_s.camelize}::#{alias_const_name}".constantize
         end
@@ -157,21 +151,10 @@ module FeaturePack
     end
 
     def define_group_methods(group)
-      def group.feature(feature_name)
-        features.find { |p| p.name.eql?(feature_name) }
-      end
-      
-      def group.views_path
-        "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views"
-      end
-      
-      def group.view(view_name)
-        "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views/#{view_name}"
-      end
-      
-      def group.javascript_module(javascript_file_name)
-        "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/javascript/#{javascript_file_name}"
-      end
+      def group.feature(feature_name) = features.find { it.name.eql?(feature_name) }      
+      def group.views_path = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views"
+      def group.view(view_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views/#{view_name}"     
+      def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/javascript/#{javascript_file_name}"
     end
 
     def discover_features
@@ -205,6 +188,20 @@ module FeaturePack
       group.features << feature
     end
 
+    def execute_after_initialize_hooks
+      # Executar hooks dos grupos
+      @@groups.each do |group|
+        hook_file = File.join(group.metadata_path, AFTER_INITIALIZE_FILE_NAME)
+        group.instance_eval(File.read(hook_file), hook_file) if File.exist?(hook_file)
+
+        # Executar hooks das features
+        group.features.each do |feature|
+          hook_file = File.join(feature.absolute_path, AFTER_INITIALIZE_FILE_NAME)
+          feature.instance_eval(File.read(hook_file), hook_file) if File.exist?(hook_file)
+        end
+      end
+    end
+
     def validate_feature_id!(base_path, relative_path)
       if base_path.scan(FEATURE_ID_PATTERN).empty?
         raise "Feature '#{relative_path}' does not have a valid ID. Expected format: feature_<id>_<name>"
@@ -212,6 +209,9 @@ module FeaturePack
     end
 
     def setup_feature_paths(relative_path, routes_file_path)
+      # Handled after initialize hooks
+      @@ignored_paths << File.join(relative_path, AFTER_INITIALIZE_FILE_NAME)
+
       # Custom routes file loads before Rails default routes
       @@ignored_paths << routes_file_path
       
@@ -246,26 +246,15 @@ module FeaturePack
     end
 
     def define_feature_methods(feature)
-      def feature.class_name
-        "FeaturePack::#{group.name.to_s.camelize}::#{name.to_s.camelize}"
-      end
-      
-      def feature.namespace
-        class_name.constantize
-      end
-      
-      def feature.view(view_name)
-        "#{views_relative_path}/#{view_name}"
-      end
-      
-      def feature.javascript_module(javascript_file_name)
-        "#{javascript_relative_path}/#{javascript_file_name}"
-      end
+      def feature.class_name = "FeaturePack::#{group.name.to_s.camelize}::#{name.to_s.camelize}"
+      def feature.namespace = class_name.constantize
+      def feature.view(view_name) = "#{views_relative_path}/#{view_name}"     
+      def feature.javascript_module(javascript_file_name) = "#{javascript_relative_path}/#{javascript_file_name}"
     end
 
     def setup_feature_aliases(feature)
-      feature.manifest.fetch(:const_aliases, []).each do |alias_data|
-        alias_method_name, alias_const_name = alias_data.first
+      feature.manifest.fetch(:const_aliases, []).each do
+        alias_method_name, alias_const_name = it.first
         feature.define_singleton_method(alias_method_name) do
           "#{class_name}::#{alias_const_name}".constantize
         end
