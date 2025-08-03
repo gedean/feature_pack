@@ -255,7 +255,7 @@ O FeaturePack suporta hooks `after_initialize` que permitem executar código cus
 
 #### Como Funciona
 
-Durante o processo de setup do FeaturePack, após todos os grupos e features serem descobertos e configurados, o sistema procura e executa arquivos `after_initialize.rb` específicos.
+Durante o processo de setup do FeaturePack, após todos os grupos e features serem descobertos e configurados, o sistema procura e executa arquivos `__after_initialize.rb` específicos.
 
 #### Localização dos Arquivos
 
