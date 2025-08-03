@@ -247,6 +247,68 @@ Access aliased constants:
 @feature.service       # => FeaturePack::HumanResources::Employees::EmployeeService
 ```
 
+## Hooks
+
+### after_initialize Hook
+
+O FeaturePack suporta hooks `after_initialize` que permitem executar código customizado após o carregamento de grupos e features.
+
+#### Como Funciona
+
+Durante o processo de setup do FeaturePack, após todos os grupos e features serem descobertos e configurados, o sistema procura e executa arquivos `after_initialize.rb` específicos.
+
+#### Localização dos Arquivos
+
+- **Para grupos**: `app/feature_packs/[nome_do_grupo]/_group_space/__after_initialize.rb`
+- **Para features**: `app/feature_packs/[nome_do_grupo]/[nome_da_feature]/__after_initialize.rb`
+
+#### Contexto de Execução
+
+Os arquivos `__after_initialize.rb` são executados no contexto do objeto group ou feature, permitindo acesso direto a todas as suas propriedades através de `self`.
+
+#### Exemplos de Uso
+
+**Hook para grupo:**
+```ruby
+# app/feature_packs/group_241209_human_resources/_group_space/__after_initialize.rb
+
+# Registrar o grupo em um sistema de auditoria
+Rails.logger.info "Grupo #{name} carregado com #{features.size} features"
+
+# Configurar permissões globais do grupo
+features.each do |feature|
+  Rails.logger.info "  - Feature #{feature.name} disponível em #{feature.manifest[:url]}"
+end
+
+# Carregar configurações específicas do grupo
+config_file = File.join(absolute_path, '_group_space', 'config.yml')
+if File.exist?(config_file)
+  @config = YAML.load_file(config_file)
+end
+```
+
+**Hook para feature:**
+```ruby
+# app/feature_packs/group_241209_human_resources/feature_241209_employees/__after_initialize.rb
+
+# Registrar rotas dinâmicas
+Rails.logger.info "Feature #{name} inicializada no grupo #{group.name}"
+
+# Verificar dependências
+required_gems = %w[devise cancancan]
+required_gems.each do |gem_name|
+  unless Gem.loaded_specs.key?(gem_name)
+    Rails.logger.warn "Feature #{name} requer a gem #{gem_name}"
+  end
+end
+
+# Registrar a feature em um sistema de métricas
+StatsD.increment("features.#{group.name}.#{name}.loaded") if defined?(StatsD)
+
+# Configurar cache específico da feature
+Rails.cache.write("feature:#{group.name}:#{name}:loaded_at", Time.current)
+```
+
 ## Best Practices
 
 1. **Group Organization**: Group related features that share common functionality
