@@ -31,6 +31,7 @@ Setup loading
   config.after_initialize do
     load FeaturePack.path.join('feature_pack/group_controller.rb')
     load FeaturePack.path.join('feature_pack/controller.rb')
+    load FeaturePack.path.join('feature_pack/api/controller.rb') # API-only features
 
     FeaturePack.groups_controllers_paths.each { |group_controller_path| load group_controller_path }
     FeaturePack.features_controllers_paths.each { |controller_path| load controller_path }

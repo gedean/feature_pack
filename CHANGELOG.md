@@ -17,6 +17,7 @@
 - `ostruct` declared as a gem dependency (required by Ruby 3.5+); Gemfile now uses `gemspec`
 
 ### Fixed
+- `FeaturePack::API::Controller` can be required on its own, before `feature_pack` is loaded
 - Failed `setup` now rolls back on `LoadError`/`SyntaxError` as well as `StandardError`
 - View prefixes are added per request instead of mutating the controller class' shared prefix array
 - Feature partial lookup passes a String prefix to ActionView (was a `Pathname`)

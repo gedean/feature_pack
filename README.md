@@ -162,6 +162,10 @@ extra declaration is needed in feature controllers.
 Feature controllers that don't need a group controller can still inherit
 `FeaturePack::Controller`, which requires the path to name a registered feature.
 
+API-only features can inherit `FeaturePack::API::Controller` (an `ActionController::API`
+subclass with no view setup). Load `feature_pack/api/controller.rb` in
+`config.after_initialize` alongside the other base controllers (see SETUP.md).
+
 The private hooks `set_view_lookup_context_prefix` and `set_layout_paths` can be
 overridden in a group controller and apply to both group and feature requests.
 
