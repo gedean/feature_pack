@@ -8,13 +8,15 @@ module FeaturePack
     desc 'Creates a new Feature within an existing Group'
     source_root File.expand_path('templates', __dir__)
 
-    argument :name, type: :string, required: true, desc: 'The group/feature name (snake_case) format: group_name/feature_name'
+    argument :name, type: :string, required: true,
+                    desc: 'The group/feature name (snake_case) format: group_name/feature_name'
 
     def add_feature
       validate_feature_name!
       parse_names
       check_group_existence!
       check_feature_existence!
+      check_group_controller!
       
       @feature_id = generate_feature_id
       @feature_dir = @group.relative_path.join("feature_#{@feature_id}_#{@feature_name}")
@@ -50,6 +52,31 @@ module FeaturePack
       if @group.nil?
         raise Thor::Error, "Group '#{@group_name}' doesn't exist. Create it first with: rails generate feature_pack:add_group #{@group_name}"
       end
+    end
+
+    # The generated feature controller inherits FeaturePack::<Group>Controller,
+    # so validate the resolved class independently of its declaration syntax.
+    def check_group_controller!
+      controller_path = @group.metadata_path.join(FeaturePack::CONTROLLER_FILE_NAME)
+      expected_class = "FeaturePack::#{@group_class_name}Controller"
+
+      unless File.exist?(controller_path)
+        raise Thor::Error,
+              "Group controller not found at #{controller_path}. The feature controller must inherit #{expected_class}."
+      end
+
+      controller_class = expected_class.safe_constantize || load_group_controller(controller_path, expected_class)
+
+      return if controller_class.is_a?(Class)
+
+      raise Thor::Error, "#{controller_path} does not define #{expected_class}, which the feature controller inherits."
+    end
+
+    def load_group_controller(controller_path, expected_class)
+      load controller_path
+      expected_class.safe_constantize
+    rescue StandardError, ScriptError => e
+      raise Thor::Error, "Could not load group controller #{controller_path}: #{e.class}: #{e.message}"
     end
 
     def check_feature_existence!

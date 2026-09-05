@@ -152,6 +152,31 @@ class FeaturePack::HumanResources::EmployeesController < FeaturePack::HumanResou
 end
 ```
 
+Generated feature controllers inherit their group's controller, so group callbacks
+(authentication, authorization, etc.) apply to every feature. The setup callback
+resolves the context from the routed path (`feature_pack/<group>/<feature>`): when the
+second segment is a registered feature the request receives `@group` and `@feature` and
+uses the feature's views; otherwise it receives `@group` and the group's views. No
+extra declaration is needed in feature controllers.
+
+Feature controllers that don't need a group controller can still inherit
+`FeaturePack::Controller`, which requires the path to name a registered feature.
+
+The private hooks `set_view_lookup_context_prefix` and `set_layout_paths` can be
+overridden in a group controller and apply to both group and feature requests.
+
+#### Migrating from 0.10.x
+
+- To share group callbacks, change a feature controller's superclass from
+  `FeaturePack::Controller` to `FeaturePack::<Group>Controller`.
+- `__after_initialize.rb` hooks are no longer loaded. Move that code to a Rails
+  initializer or to the group/feature controller and delete the hook files. Leftover
+  files are ignored by Zeitwerk, but they are dead code.
+- `FeaturePack::API::Controller` was removed; inherit `ActionController::API` directly.
+- `FeaturePack.setup` now fails when `app/feature_packs` does not exist. Create the
+  directory, or call `FeaturePack.setup(require_features_path: false)` to boot with no
+  groups (a warning is logged).
+
 ## Routes
 
 Routes are automatically configured based on manifest files:
@@ -247,68 +272,6 @@ Access aliased constants:
 @feature.service       # => FeaturePack::HumanResources::Employees::EmployeeService
 ```
 
-## Hooks
-
-### after_initialize Hook
-
-O FeaturePack suporta hooks `after_initialize` que permitem executar código customizado após o carregamento de grupos e features.
-
-#### Como Funciona
-
-Durante o processo de setup do FeaturePack, após todos os grupos e features serem descobertos e configurados, o sistema procura e executa arquivos `__after_initialize.rb` específicos.
-
-#### Localização dos Arquivos
-
-- **Para grupos**: `app/feature_packs/[nome_do_grupo]/_group_space/__after_initialize.rb`
-- **Para features**: `app/feature_packs/[nome_do_grupo]/[nome_da_feature]/__after_initialize.rb`
-
-#### Contexto de Execução
-
-Os arquivos `__after_initialize.rb` são executados no contexto do objeto group ou feature, permitindo acesso direto a todas as suas propriedades através de `self`.
-
-#### Exemplos de Uso
-
-**Hook para grupo:**
-```ruby
-# app/feature_packs/group_241209_human_resources/_group_space/__after_initialize.rb
-
-# Registrar o grupo em um sistema de auditoria
-Rails.logger.info "Grupo #{name} carregado com #{features.size} features"
-
-# Configurar permissões globais do grupo
-features.each do |feature|
-  Rails.logger.info "  - Feature #{feature.name} disponível em #{feature.manifest[:url]}"
-end
-
-# Carregar configurações específicas do grupo
-config_file = File.join(absolute_path, '_group_space', 'config.yml')
-if File.exist?(config_file)
-  @config = YAML.load_file(config_file)
-end
-```
-
-**Hook para feature:**
-```ruby
-# app/feature_packs/group_241209_human_resources/feature_241209_employees/__after_initialize.rb
-
-# Registrar rotas dinâmicas
-Rails.logger.info "Feature #{name} inicializada no grupo #{group.name}"
-
-# Verificar dependências
-required_gems = %w[devise cancancan]
-required_gems.each do |gem_name|
-  unless Gem.loaded_specs.key?(gem_name)
-    Rails.logger.warn "Feature #{name} requer a gem #{gem_name}"
-  end
-end
-
-# Registrar a feature em um sistema de métricas
-StatsD.increment("features.#{group.name}.#{name}.loaded") if defined?(StatsD)
-
-# Configurar cache específico da feature
-Rails.cache.write("feature:#{group.name}:#{name}:loaded_at", Time.current)
-```
-
 ## Best Practices
 
 1. **Group Organization**: Group related features that share common functionality
@@ -357,3 +320,13 @@ Gedean Dias - gedean.dias@gmail.com
 - [GitHub Repository](https://github.com/gedean/feature_pack)
 - [RubyGems](https://rubygems.org/gems/feature_pack)
 - [Bug Reports](https://github.com/gedean/feature_pack/issues)
+
+## Tests
+
+```bash
+bundle install
+bundle exec rspec
+```
+
+The suite covers discovery, setup rollback, first-time generation, duplicate
+protection, inherited authorization, and Rails request rendering using ERB fixtures.

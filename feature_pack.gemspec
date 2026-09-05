@@ -1,7 +1,7 @@
 Gem::Specification.new do |spec|
   spec.name          = 'feature_pack'
-  spec.version       = '0.10.0'
-  spec.date          = '2025-08-03'
+  spec.version       = '0.11.0'
+  spec.date          = '2026-09-05'
   spec.platform      = Gem::Platform::RUBY
   spec.summary       = 'A different approach to organizing Rails app features.'
   spec.description   = <<~DESC
@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/gedean/feature_pack'
   spec.license       = 'MIT'
   spec.add_dependency 'activesupport', '>= 7.0', '< 9.0'
+  spec.add_dependency 'ostruct'
   spec.post_install_message = 'Please check the README file for use instructions.'
   spec.metadata = {
     'bug_tracker_uri' => 'https://github.com/gedean/feature_pack/issues',

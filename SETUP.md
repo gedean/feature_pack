@@ -15,8 +15,7 @@ Setup loading
 ```ruby
 # config/application.rb
 
-  feature_packs_path = Rails.root.join('app/feature_packs')
-  FeaturePack.setup(features_path: feature_packs_path)
+  FeaturePack.setup
 
   FeaturePack.ignored_paths.each { |path| Rails.autoloaders.main.ignore(Rails.root.join(path)) }
 

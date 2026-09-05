@@ -30,7 +30,7 @@ The module defines several read-only attributes:
 
 The `setup` method initializes the FeaturePack library:
 
-1. Validates the provided `features_path`
+1. Resolves `features_path` to `Rails.root/app/feature_packs` and validates it (missing directory raises unless `require_features_path: false`)
 2. Sets up ignored paths
 3. Discovers and initializes groups and features
 4. Sets up routes and controllers for groups and features
@@ -38,7 +38,7 @@ The `setup` method initializes the FeaturePack library:
 ### Usage
 
 ```ruby
-FeaturePack.setup(features_path: '/path/to/features')
+FeaturePack.setup
 ```
 
 ## Groups

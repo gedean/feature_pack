@@ -1,8 +1,14 @@
 require 'active_support/all'
+require 'ostruct'
 
 # FeaturePack module provides a way to organize Rails applications into
 # groups and features, enabling better code organization and isolation
 module FeaturePack
+  @initialized = false
+
+  # Raised when registry data is requested before `setup` succeeded
+  class NotInitializedError < StandardError; end
+
   # Pattern constants for identifying groups and features
   GROUP_ID_PATTERN = /^group_.*?_/.freeze
   FEATURE_ID_PATTERN = /^feature_.*?_/.freeze
@@ -11,9 +17,10 @@ module FeaturePack
   GROUP_SPACE_DIRECTORY = '_group_space'.freeze
   MANIFEST_FILE_NAME = 'manifest.yaml'.freeze
   CONTROLLER_FILE_NAME = 'controller.rb'.freeze
-  AFTER_INITIALIZE_FILE_NAME = '__after_initialize.rb'.freeze
+  # Hook file from 0.10.x; no longer loaded but still kept away from Zeitwerk
+  LEGACY_HOOK_FILE_NAME = '__after_initialize.rb'.freeze
 
-  # Attribute readers that will be dynamically defined
+  # Registry attributes populated by `setup`
   ATTR_READERS = %i[
     path
     features_path
@@ -27,20 +34,39 @@ module FeaturePack
   class << self
     # Sets up the FeaturePack system
     # This method should be called once during Rails initialization
-    def setup
-      raise 'FeaturePack already setup!' if defined?(@@setup_executed_flag)
+    # @param require_features_path [Boolean] when true (default), a missing
+    #   app/feature_packs directory aborts the boot; pass false to boot with no
+    #   groups (e.g. before generating the first group).
+    def setup(require_features_path: true)
+      raise 'FeaturePack already setup!' if @initialized
 
-      initialize_paths
-      load_dependencies
-      discover_groups
-      discover_features
-      finalize_setup
+      begin
+        initialize_paths(require_features_path)
+        load_dependencies
+        discover_groups
+        discover_features
+        finalize_setup
+        @initialized = true
+      rescue StandardError, ScriptError
+        # ScriptError covers LoadError/SyntaxError raised while loading files.
+        reset_state!
+        raise
+      end
+    end
+
+    def initialized? = @initialized
+
+    ATTR_READERS.each do |attr|
+      define_method(attr) do
+        ensure_initialized!
+        instance_variable_get("@#{attr}")
+      end
     end
 
     # Finds a group by name
     # @param group_name [Symbol] The name of the group
     # @return [OpenStruct, nil] The group object or nil if not found
-    def group(group_name) = @@groups.find { it.name.eql?(group_name) }
+    def group(group_name) = groups.find { |group| group.name.eql?(group_name) }
 
     # Finds a feature within a group
     # @param group_name [Symbol] The name of the group
@@ -49,45 +75,68 @@ module FeaturePack
     def feature(group_name, feature_name)
       requested_group = group(group_name)
       return nil if requested_group.nil?
-      
+
       requested_group.feature(feature_name)
     end
 
     private
 
-    def initialize_paths
-      @@path = Pathname.new(__dir__)
-      @@features_path = Pathname.new(Rails.root.join('app/feature_packs'))
-      
-      validate_features_path!
-      
-      @@groups_controllers_paths = []
-      @@features_controllers_paths = []
-      @@ignored_paths = Dir.glob("#{@@features_path}/[!]*/")
-      @@javascript_files_paths = discover_javascript_files
+    def ensure_initialized!
+      return if @initialized
+
+      raise NotInitializedError, 'FeaturePack is not set up. Call FeaturePack.setup first.'
     end
 
-    def load_dependencies = load @@path.join('feature_pack/error.rb')
+    def initialize_paths(require_features_path)
+      @path = Pathname.new(__dir__)
+      @features_path = Pathname.new(Rails.root.join('app/feature_packs'))
 
-    def validate_features_path!
-      raise "Invalid features_path: '#{@@features_path}'" if @@features_path.nil?
-      raise "Features path does not exist: '#{@@features_path}'" unless Dir.exist?(@@features_path)
+      validate_features_path!(require_features_path)
+
+      @groups_controllers_paths = []
+      @features_controllers_paths = []
+      # Every entry under features_path is ignored by Zeitwerk; controllers and
+      # routes are loaded explicitly (see SETUP.md), and feature modules are
+      # registered through push_dir by the host application.
+      @ignored_paths = Dir.glob("#{@features_path}/*/")
+      @javascript_files_paths = discover_javascript_files
+    end
+
+    def load_dependencies = load(@path.join('feature_pack/error.rb'))
+
+    def validate_features_path!(require_features_path)
+      if @features_path.exist?
+        raise "Features path is not a directory: '#{@features_path}'" unless @features_path.directory?
+        return
+      end
+
+      message = "Features path '#{@features_path}' does not exist"
+      if require_features_path
+        raise "#{message}. Create app/feature_packs or call FeaturePack.setup(require_features_path: false)"
+      end
+
+      log_warning("[FeaturePack] #{message}. No groups or features will be loaded.")
+    end
+
+    def log_warning(message)
+      logger = Rails.respond_to?(:logger) ? Rails.logger : nil
+      logger ? logger.warn(message) : warn(message)
     end
 
     def discover_javascript_files
-      Dir.glob("#{@@features_path}/[!_]*/**/*.js")
-        .map { |js_path| js_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '') }
-        .to_a
+      prefix = "#{@features_path}/"
+      Dir.glob("#{prefix}[!_]*/**/*.js").map { |js_path| js_path.delete_prefix(prefix) }
     end
 
-    def finalize_setup
-      ATTR_READERS.each { |attr| define_singleton_method(attr) { class_variable_get("@@#{attr}") } }
-      @@ignored_paths << @@path.join('feature_pack/feature_pack_routes.rb')
-      execute_after_initialize_hooks
-      @@setup_executed_flag = true
+    def finalize_setup = @ignored_paths << @path.join('feature_pack/feature_pack_routes.rb')
+
+    # Clears every registry attribute so a failed or repeated setup starts clean
+    def reset_state!
+      @initialized = false
+      ATTR_READERS.each { |attr| remove_instance_variable("@#{attr}") if instance_variable_defined?("@#{attr}") }
     end
 
-    def discover_groups = @@groups = Dir.glob("#{@@features_path}/[!_]*/").map { build_group(it) }
+    def discover_groups = @groups = Dir.glob("#{@features_path}/[!_]*/").map { |group_path| build_group(group_path) }
 
     def build_group(group_path)
       relative_path = Pathname.new(group_path)
@@ -96,7 +145,7 @@ module FeaturePack
       validate_group_id!(base_path)
       
       routes_file = find_group_routes_file(group_path, base_path)
-      @@groups_controllers_paths << File.join(group_path, GROUP_SPACE_DIRECTORY, CONTROLLER_FILE_NAME)
+      register_group_controller(group_path)
       
       group = create_group_struct(base_path, group_path, relative_path, routes_file)
       setup_group_aliases(group)
@@ -109,6 +158,14 @@ module FeaturePack
       if base_path.scan(GROUP_ID_PATTERN).empty?
         raise "Group '#{base_path}' does not have a valid ID. Expected format: group_<id>_<name>"
       end
+    end
+
+    # Groups without a controller are allowed (namespace-only groups);
+    # add_feature validates the controller when a feature needs to inherit it.
+    def register_group_controller(group_path)
+      controller_path = File.join(group_path, GROUP_SPACE_DIRECTORY, CONTROLLER_FILE_NAME)
+      @groups_controllers_paths << controller_path if File.exist?(controller_path)
+      @ignored_paths << File.join(group_path, GROUP_SPACE_DIRECTORY, LEGACY_HOOK_FILE_NAME)
     end
 
     def find_group_routes_file(group_path, base_path)
@@ -126,7 +183,7 @@ module FeaturePack
       OpenStruct.new(
         id: base_path.scan(GROUP_ID_PATTERN).first.delete_suffix('_'),
         name: base_path.gsub(GROUP_ID_PATTERN, '').to_sym,
-        metadata_path: @@features_path.join(group_path, GROUP_SPACE_DIRECTORY),
+        metadata_path: @features_path.join(group_path, GROUP_SPACE_DIRECTORY),
         relative_path: relative_path,
         base_dir: File.basename(relative_path, File::SEPARATOR),
         routes_file: routes_file,
@@ -142,8 +199,8 @@ module FeaturePack
     end
 
     def setup_group_aliases(group)
-      group.manifest.fetch(:const_aliases, []).each do
-        alias_method_name, alias_const_name = it.first
+      group.manifest.fetch(:const_aliases, []).each do |const_alias|
+        alias_method_name, alias_const_name = const_alias.first
         group.define_singleton_method(alias_method_name) do
           "FeaturePack::#{group.name.to_s.camelize}::#{alias_const_name}".constantize
         end
@@ -151,14 +208,14 @@ module FeaturePack
     end
 
     def define_group_methods(group)
-      def group.feature(feature_name) = features.find { it.name.eql?(feature_name) }      
+      def group.feature(feature_name) = features.find { |feature| feature.name.eql?(feature_name) }
       def group.views_path = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views"
       def group.view(view_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/views/#{view_name}"     
       def group.javascript_module(javascript_file_name) = "#{base_dir}/#{GROUP_SPACE_DIRECTORY}/javascript/#{javascript_file_name}"
     end
 
     def discover_features
-      @@groups.each do |group|
+      @groups.each do |group|
         Dir.glob("#{group.relative_path}[!_]*/").each do |feature_path|
           build_feature(group, feature_path)
         end
@@ -166,7 +223,7 @@ module FeaturePack
     end
 
     def build_feature(group, feature_path)
-      absolute_path = @@features_path.join(feature_path)
+      absolute_path = @features_path.join(feature_path)
       relative_path = Pathname.new(feature_path)
       base_path = File.basename(feature_path, File::SEPARATOR)
       
@@ -188,20 +245,6 @@ module FeaturePack
       group.features << feature
     end
 
-    def execute_after_initialize_hooks
-      # Executar hooks dos grupos
-      @@groups.each do |group|
-        hook_file = File.join(group.metadata_path, AFTER_INITIALIZE_FILE_NAME)
-        group.instance_eval(File.read(hook_file), hook_file) if File.exist?(hook_file)
-
-        # Executar hooks das features
-        group.features.each do |feature|
-          hook_file = File.join(feature.absolute_path, AFTER_INITIALIZE_FILE_NAME)
-          feature.instance_eval(File.read(hook_file), hook_file) if File.exist?(hook_file)
-        end
-      end
-    end
-
     def validate_feature_id!(base_path, relative_path)
       if base_path.scan(FEATURE_ID_PATTERN).empty?
         raise "Feature '#{relative_path}' does not have a valid ID. Expected format: feature_<id>_<name>"
@@ -209,20 +252,20 @@ module FeaturePack
     end
 
     def setup_feature_paths(relative_path, routes_file_path)
-      # Handled after initialize hooks
-      @@ignored_paths << File.join(relative_path, AFTER_INITIALIZE_FILE_NAME)
-
       # Custom routes file loads before Rails default routes
-      @@ignored_paths << routes_file_path
+      @ignored_paths << routes_file_path
       
       # Controllers have special load process due to Zeitwerk
       controller_path = relative_path.join(CONTROLLER_FILE_NAME)
-      @@features_controllers_paths << controller_path
-      @@ignored_paths << controller_path
+      @features_controllers_paths << controller_path
+      @ignored_paths << controller_path
+      # Feature directories are Zeitwerk roots (push_dir), so the group-level
+      # ignore does not cover leftover 0.10.x hook files.
+      @ignored_paths << relative_path.join(LEGACY_HOOK_FILE_NAME)
     end
 
     def create_feature_struct(base_path, feature_name, group, absolute_path, relative_path, routes_file_path, feature_path)
-      feature_sub_path = relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '')
+      feature_sub_path = relative_path.sub(/^#{Regexp.escape(@features_path.to_s)}\//, '')
       manifest_path = File.join(feature_path, MANIFEST_FILE_NAME)
       
       unless File.exist?(manifest_path)
@@ -239,8 +282,8 @@ module FeaturePack
         routes_file_path: routes_file_path,
         routes_file: feature_sub_path.join('routes'),
         views_absolute_path: absolute_path.join('views'),
-        views_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('views'),
-        javascript_relative_path: relative_path.sub(/^#{Regexp.escape(@@features_path.to_s)}\//, '').join('javascript'),
+        views_relative_path: feature_sub_path.join('views'),
+        javascript_relative_path: feature_sub_path.join('javascript'),
         manifest: load_manifest(manifest_path)
       )
     end
@@ -253,8 +296,8 @@ module FeaturePack
     end
 
     def setup_feature_aliases(feature)
-      feature.manifest.fetch(:const_aliases, []).each do
-        alias_method_name, alias_const_name = it.first
+      feature.manifest.fetch(:const_aliases, []).each do |const_alias|
+        alias_method_name, alias_const_name = const_alias.first
         feature.define_singleton_method(alias_method_name) do
           "#{class_name}::#{alias_const_name}".constantize
         end
