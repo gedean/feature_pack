@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.11.0] - 2026-09-05
+## [0.12.0] - 2026-09-05
 ### Added
 - `FeaturePack.initialized?` and `FeaturePack::NotInitializedError`
 - `FeaturePack.setup(require_features_path:)` to allow booting without `app/feature_packs`

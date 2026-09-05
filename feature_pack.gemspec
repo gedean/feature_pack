@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = 'feature_pack'
-  spec.version       = '0.11.0'
+  spec.version       = '0.12.0'
   spec.date          = '2026-09-05'
   spec.platform      = Gem::Platform::RUBY
   spec.summary       = 'A different approach to organizing Rails app features.'
