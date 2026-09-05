@@ -24,7 +24,6 @@
 
 ### Removed
 - `__after_initialize.rb` hooks (introduced in 0.10.0)
-- `FeaturePack::API::Controller`
 
 ## [0.10.0] - 2025-08-03
 ### Added

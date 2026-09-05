@@ -172,7 +172,6 @@ overridden in a group controller and apply to both group and feature requests.
 - `__after_initialize.rb` hooks are no longer loaded. Move that code to a Rails
   initializer or to the group/feature controller and delete the hook files. Leftover
   files are ignored by Zeitwerk, but they are dead code.
-- `FeaturePack::API::Controller` was removed; inherit `ActionController::API` directly.
 - `FeaturePack.setup` now fails when `app/feature_packs` does not exist. Create the
   directory, or call `FeaturePack.setup(require_features_path: false)` to boot with no
   groups (a warning is logged).
